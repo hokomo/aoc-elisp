@@ -11,6 +11,6 @@
 - [[#file-aoc-emacs-el][Emacs Integration]]
 
 
-- [[#file-day-03-el][Day 03]]
-- [[#file-day-02-el][Day 02]]
-- [[#file-day-01-el][Day 01]]
+- [[#file-day-03-el][Day 03]] ([[#file-day-03-clean-el][clean]])
+- [[#file-day-02-el][Day 02]] ([[#file-day-02-clean-el][clean]])
+- [[#file-day-01-el][Day 01]] ([[#file-day-01-clean-el][clean]])

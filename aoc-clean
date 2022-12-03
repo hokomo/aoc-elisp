@@ -1,0 +1,26 @@
+#!/usr/bin/env -S emacs --script
+;; -*- mode: emacs-lisp; lexical-binding: t; -*-
+
+(add-to-list
+ 'load-path
+ (file-name-directory
+  (cond
+   (load-in-progress
+    load-file-name)
+   ((and (boundp 'byte-compile-current-file)
+         byte-compile-current-file)
+    byte-compile-current-file)
+   (t
+    (buffer-file-name)))))
+
+(require 'cl-lib)
+(require 'aoc-emacs)
+
+(when (< (length argv) 1)
+  (error "Usage: %s <file>" load-file-name))
+
+(let ((filename (cl-first argv)))
+  (let ((inhibit-message t))
+    (with-current-buffer (aoc-clean-buffer (find-file-existing filename))
+      (write-file (expand-file-name
+                   (concat (file-name-base filename) "-clean.el"))))))
