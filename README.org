@@ -1,6 +1,6 @@
 * About
 
-🎁 🎄 Advent of Code 2022 🎄 🎁
+🎁 🎄 [[https://adventofcode.com/2022][Advent of Code 2022]] 🎄 🎁
 
 [[https://cdn.discordapp.com/emojis/832967182136377384.png]]
 
