@@ -14,6 +14,8 @@
     (buffer-file-name)))))
 
 (require 'cl-lib)
+(provide 's)
+(provide 'f)
 (require 'aoc-emacs)
 
 (when (< (length argv) 1)

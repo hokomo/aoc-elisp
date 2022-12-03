@@ -1,5 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
+(require 'cl-lib)
+(require 'f)
+(require 's)
+(require 'url)
+
 (defmacro save-kill-ring (&rest body)
   `(let* ((kill-ring '())
           (kill-ring-yank-pointer kill-ring))
@@ -74,11 +79,50 @@
 (defvar aoc-root
   (expand-file-name "~/Desktop/sync/aoc-2022/"))
 
-(defun aoc-new (filename level)
-  (interactive (let* ((day (read-string "Day: " (format-time-string "%d")))
-                      (filename (expand-file-name (format "day-%s.el" day)
+(defun aoc-read-day ()
+  (string-to-number (read-string "Day: " (format-time-string "%-d"))))
+
+(defvar aoc-session nil)
+
+(defun aoc-session ()
+  (let ((session-file (expand-file-name ".session" aoc-root)))
+    (and (f-exists-p session-file) (s-trim (f-read-text session-file)))))
+
+(defun aoc-url (year day &optional kind)
+  (let ((base (format "https://adventofcode.com/%d/day/%d" year day)))
+    (cl-ecase kind
+      ((nil) base)
+      (:input (concat base "/input"))
+      (:answer (concat base "/answer")))))
+
+(defun aoc-fetch (url)
+  (unless aoc-session
+    (error "Missing session cookie"))
+  (let ((url-request-extra-headers
+         `(("Cookie" . ,(format "session=%s" aoc-session)))))
+    (with-current-buffer (url-retrieve-synchronously url t)
+      (prog1 (current-buffer)
+        (goto-char (point-min))
+        ;; Get rid of the HTTP response headers.
+        (re-search-forward "\n\n")
+        (delete-region (point-min) (point))))))
+
+(defun aoc-fetch-input (year day)
+  (interactive (list (string-to-number (format-time-string "%Y"))
+                     (aoc-read-day)))
+  (let ((input-file (expand-file-name (format "input-%02d.txt" day) aoc-root)))
+    (if (file-exists-p input-file)
+        (message "%s already exists" input-file)
+      (with-current-buffer (aoc-fetch (aoc-url year day :input))
+        (write-file input-file))
+      (message "Input saved to %s" input-file))))
+
+(cl-defun aoc-new (filename level &optional year day)
+  (interactive (let* ((day (aoc-read-day))
+                      (filename (expand-file-name (format "day-%02d.el" day)
                                                   aoc-root)))
-                 (list filename day)))
+                 (list filename (format "%02d" day)
+                       (string-to-number (format-time-string "%Y")) day)))
   (find-file filename)
   (unless (file-exists-p filename)
     (save-excursion
@@ -86,7 +130,10 @@
       (goto-char (point-min))
       (while (re-search-forward (rx "<level>") nil t)
         (replace-match level)))
-    (normal-mode)))
+    (normal-mode))
+  (when (y-or-n-p "Fetch input?")
+    (let ((aoc-session (or aoc-session (aoc-session))))
+      (aoc-fetch-input year day))))
 
 (define-minor-mode aoc-mode
   "Mode for Advent of Code"
