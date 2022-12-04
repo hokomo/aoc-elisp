@@ -14,6 +14,9 @@
     (buffer-file-name)))))
 
 (require 'cl-lib)
+;; HACK: Provide `s' and `f' so `aoc-emacs' doesn't fail loading, as they are
+;; not part of the Emacs distribution. The function we need, `aoc-clean-buffer',
+;; doesn't use any of these packages anyway.
 (provide 's)
 (provide 'f)
 (require 'aoc-emacs)
