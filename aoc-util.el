@@ -5,6 +5,8 @@
 (require 'pcase)
 (require 'seq)
 
+;;; Input
+
 (defun read-puzzle (f test)
   (funcall f (if (file-exists-p (expand-file-name test))
                  (with-temp-buffer
@@ -18,6 +20,8 @@
      (defvar ,var (read-puzzle ,f ,test))
      ,var))
 
+;;; Lists
+
 (defun sum (seq)
   (reduce #'+ seq))
 
@@ -27,11 +31,29 @@
 (defun join (list)
   (apply #'-concat list))
 
+;;; Comparison
+
+(defun compare-by (pred key)
+  (lambda (x y) (funcall pred (funcall key x) (funcall key y))))
+
+(defun lexicographical-compare (pred &rest rest)
+  (let ((preds (cons pred rest)))
+    (lambda (x y)
+      (cl-loop for (pred . rest) = preds then rest
+               when (funcall pred x y)
+                 return t
+               when (or (not rest) (funcall pred y x))
+                 return nil))))
+
+;;; Asserts
+
 (defmacro expect (expr outcome)
   (mmt-once-only (expr outcome)
     `(prog1 ,expr
-       (unless (= ,expr ,outcome)
+       (and ,outcome (/= ,expr ,outcome)
          (error "Fail! Got: %s, Expected: %s" ,expr ,outcome)))))
+
+;;; Destructuring
 
 (defmacro defun/p (name params &rest body)
   (let ((syms (cl-loop repeat (length params) collect (gensym))))
