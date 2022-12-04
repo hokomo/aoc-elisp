@@ -22,7 +22,7 @@
     (goto-char (match-beginning 0))
     (delete-sexp)))
 
-(defun aoc-clean-buffer (buffer)
+(defun aoc-clean-buffer (buffer &optional remove-comments)
   ;; Should not prefix the buffer name with a space, because uninteresting
   ;; buffers are not fontified by font-lock. See
   ;; https://stackoverflow.com/q/18418079.
@@ -39,6 +39,14 @@
           ;; Remove `definput' and `expect'.
           (delete-sexps (rx bol "(definput"))
           (delete-sexps (rx bol "(expect"))
+          (when remove-comments
+            ;; Delete comments.
+            (goto-char (point-min))
+            (while (re-search-forward (rx bol (* blank) ";;") nil t)
+              (goto-char (match-beginning 0))
+              (kill-line)
+              (while (looking-at "\n")
+                (kill-line))))
           (delete-trailing-whitespace))
         (funcall (buffer-local-value 'major-mode buffer))))))
 
@@ -56,9 +64,9 @@
         (goto-char (point-max))
         (insert marker)))))
 
-(defun aoc-copy (buffer)
-  (interactive (list (current-buffer)))
-  (with-current-buffer (aoc-clean-buffer buffer)
+(defun aoc-copy (buffer &optional remove-comments)
+  (interactive (list (current-buffer) current-prefix-arg))
+  (with-current-buffer (aoc-clean-buffer buffer remove-comments)
     (let* ((name (symbol-name major-mode))
            (lang (and (string-match (rx (*? nonl) (group (+ (not "-"))) "-mode")
                                     name)
