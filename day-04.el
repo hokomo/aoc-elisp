@@ -32,6 +32,7 @@
            x y))
 
 (defun/s complete-overlap-p ([[a b] [c d]])
+  ;; NOTE: Assume the pairs are sorted wrt each other.
   (or (>= b d) (and (= c a) (>= d b))))
 
 (defun solve-04-1 (pairs)
@@ -43,6 +44,7 @@
 (expect (solve-04-1 *input-04*) 509)
 
 (defun/s overlap-p ([[a b] [c d]])
+  ;; NOTE: Assume the pairs are sorted wrt each other.
   (<= c b))
 
 (defun solve-04-2 (pairs)
