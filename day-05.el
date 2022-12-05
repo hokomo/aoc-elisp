@@ -20,7 +20,7 @@
 (defun parse-move (line)
   (let ((groups (rx-let ((n (group (+ digit))))
                   (s-match (rx "move " n " from " n " to " n) line))))
-    (seq-let [n from to] (-map #'string-to-number (cdr groups))
+    (seq-let [n from to] (-map #'int (cdr groups))
       (list n (1- from) (1- to)))))
 
 (defun read-05 (string)

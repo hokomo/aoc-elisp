@@ -6,13 +6,13 @@
 (require 'aoc-util)
 
 (defun parse-range (range)
-  (-map #'string-to-number (s-split "-" range)))
+  (-map #'int (s-split "-" range)))
 
-(defun parse-line (line)
+(defun parse-pair (line)
   (-map #'parse-range (s-split "," line)))
 
 (defun read-04 (string)
-  (-map #'parse-line (s-split "\n" string t)))
+  (-map #'parse-pair (s-split "\n" string t)))
 
 (definput *test-04* #'read-04
   "2-4,6-8

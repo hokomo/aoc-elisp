@@ -20,10 +20,16 @@
      (defvar ,var (read-puzzle ,f ,test))
      ,var))
 
+;;; Shorthands
+
+(defalias 'int 'string-to-number)
+
+(defalias 'char 'string-to-char)
+
 ;;; Lists
 
 (defun sum (seq)
-  (reduce #'+ seq))
+  (cl-reduce #'+ seq))
 
 (defun top-n (n list)
   (-take n (sort list #'>)))

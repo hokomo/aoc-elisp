@@ -9,12 +9,12 @@
 ;;;
 ;;; We map each of XYZ and ABC to 012.
 
-(defun parse-line (line)
-  (cl-destructuring-bind (x y) (-map #'string-to-char (s-split " " line))
+(defun parse-round (line)
+  (cl-destructuring-bind (x y) (-map #'char (s-split " " line))
     (list (- x ?A) (- y ?X))))
 
 (defun read-02 (string)
-  (-map #'parse-line (s-split "\n" string t)))
+  (-map #'parse-round (s-split "\n" string t)))
 
 (definput *test-02* #'read-02
   "A Y
