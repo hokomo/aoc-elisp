@@ -31,6 +31,9 @@
 (defun join (list)
   (apply #'-concat list))
 
+(defun transpose (lists)
+  (apply #'cl-mapcar #'list lists))
+
 ;;; Comparison
 
 (defun compare-by (pred key)
@@ -50,7 +53,7 @@
 (defmacro expect (expr outcome)
   (mmt-once-only (expr outcome)
     `(prog1 ,expr
-       (and ,outcome (/= ,expr ,outcome)
+       (and ,outcome (not (equal ,expr ,outcome))
          (error "Fail! Got: %s, Expected: %s" ,expr ,outcome)))))
 
 ;;; Destructuring
