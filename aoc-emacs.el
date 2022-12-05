@@ -143,11 +143,26 @@
     (let ((aoc-session (or aoc-session (aoc-session))))
       (aoc-fetch-input year day))))
 
+(defun aoc-readme-insert (day)
+  (interactive (list (aoc-read-day)))
+  (with-current-buffer (find-file-existing
+                        (expand-file-name "README.org" aoc-root))
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward (rx "\n\n\n" bol "- ") nil t)
+        (previous-line)
+        (beginning-of-line)
+        (insert
+         (format
+          "\n- [[#file-day-%02d-el][Day %02d]] ([[#file-day-%02d-clean-el][clean]])"
+          day day day))))))
+
 (define-minor-mode aoc-mode
   "Mode for Advent of Code"
   :lighter "AoC"
   :keymap (make-sparse-keymap))
 
 (define-key aoc-mode-map (kbd "C-c C-c") #'aoc-copy)
+(define-key aoc-mode-map (kbd "C-c C-e") #'aoc-readme-insert)
 
 (provide 'aoc-emacs)
