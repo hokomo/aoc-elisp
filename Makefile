@@ -7,6 +7,10 @@ all: $(CLEAN)
 $(CLEAN): %-clean.el: %.el
 	./aoc-clean $^
 
+.PHONY: push
+push:
+	./push
+
 .PHONY: clean
 clean:
 	$(RM) $(CLEAN)
