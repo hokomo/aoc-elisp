@@ -24,6 +24,8 @@
 (when (< (length argv) 1)
   (error "Usage: %s <file>" load-file-name))
 
+(setq make-backup-files nil)
+
 (let ((filename (cl-first argv)))
   (let ((inhibit-message t))
     (with-current-buffer (aoc-clean-buffer (find-file-existing filename))
