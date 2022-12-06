@@ -40,6 +40,10 @@
 (defun transpose (lists)
   (apply #'cl-mapcar #'list lists))
 
+(defun windows (n seq)
+  (cl-loop for i from 0 below (1+ (- (length seq) n))
+           collect (seq-subseq seq i (+ i n))))
+
 ;;; Comparison
 
 (defun compare-by (pred key)
