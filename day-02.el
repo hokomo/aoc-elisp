@@ -7,7 +7,7 @@
 
 ;;; `rps' is short for `rock-paper-scissors'.
 ;;;
-;;; We map each of XYZ and ABC to 012.
+;;; We map each of RPS, XYZ and ABC to 012.
 
 (defun parse-round (line)
   (cl-destructuring-bind (x y) (-map #'char (s-split " " line))
