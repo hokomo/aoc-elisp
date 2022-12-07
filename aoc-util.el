@@ -29,7 +29,7 @@
 ;;; Lists
 
 (defun top-n (n list)
-  (-take n (sort list #'>)))
+  (-take n (-sort list #'>)))
 
 (defun join (list)
   (apply #'-concat list))
