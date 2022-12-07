@@ -42,14 +42,14 @@
     (`(dir ,_ . ,items)
      (let-alist (-group-by #'car items)
        (let* ((sizes (-map #'size-tree .dir))
-              (total (+ (sum (-map #'car sizes))
-                        (sum (-map #'cl-third .file)))))
+              (total (+ (-sum (-map #'car sizes))
+                        (-sum (-map #'cl-third .file)))))
          `(,total ,@sizes))))))
 
 (defun solve-07-1 (commands)
   (->> (-flatten (size-tree (reconstruct-tree commands)))
        (--filter (< it 100000))
-       sum))
+       -sum))
 
 (defun solve-07-2 (commands)
   (seq-let [total &rest sizes] (size-tree (reconstruct-tree commands))

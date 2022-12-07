@@ -29,7 +29,7 @@
 (definput *input-01* #'read-01 "input-01.txt")
 
 (defun calorie-sum (n calories)
-  (sum (top-n n (-map #'sum calories))))
+  (-sum (top-n n (-map #'-sum calories))))
 
 (defun solve-01-1 (calories)
   (calorie-sum 1 calories))

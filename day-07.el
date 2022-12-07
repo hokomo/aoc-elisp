@@ -77,14 +77,14 @@ $ ls
     (`(dir ,_ . ,items)
      (let-alist (-group-by #'car items)
        (let* ((sizes (-map #'size-tree .dir))
-              (total (+ (sum (-map #'car sizes))
-                        (sum (-map #'cl-third .file)))))
+              (total (+ (-sum (-map #'car sizes))
+                        (-sum (-map #'cl-third .file)))))
          `(,total ,@sizes))))))
 
 (defun solve-07-1 (commands)
   (->> (-flatten (size-tree (reconstruct-tree commands)))
        (--filter (< it 100000))
-       sum))
+       -sum))
 
 (expect (solve-07-1 *test-07*) 95437)
 (expect (solve-07-1 *input-07*) 1644735)

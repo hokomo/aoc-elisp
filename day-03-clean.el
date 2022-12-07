@@ -15,10 +15,10 @@
   (cl-first (seq-intersection x y)))
 
 (defun solve-03-1 (rucksacks)
-  (sum (-map #'find-shared rucksacks)))
+  (-sum (-map #'find-shared rucksacks)))
 
 (defun find-badge (group)
   (cl-first (cl-reduce #'seq-intersection (-map #'join group))))
 
 (defun solve-03-2 (rucksacks)
-  (sum (-map #'find-badge (seq-partition rucksacks 3))))
+  (-sum (-map #'find-badge (seq-partition rucksacks 3))))

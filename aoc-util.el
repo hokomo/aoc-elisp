@@ -28,9 +28,6 @@
 
 ;;; Lists
 
-(defun sum (seq)
-  (cl-reduce #'+ seq))
-
 (defun top-n (n list)
   (-take n (sort list #'>)))
 

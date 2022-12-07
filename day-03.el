@@ -32,7 +32,7 @@ CrZsJsPPZsGzwwsLwLmpwMDw")
   (cl-first (seq-intersection x y)))
 
 (defun solve-03-1 (rucksacks)
-  (sum (-map #'find-shared rucksacks)))
+  (-sum (-map #'find-shared rucksacks)))
 
 (expect (solve-03-1 *test-03*) 157)
 (expect (solve-03-1 *input-03*) 7917)
@@ -41,7 +41,7 @@ CrZsJsPPZsGzwwsLwLmpwMDw")
   (cl-first (cl-reduce #'seq-intersection (-map #'join group))))
 
 (defun solve-03-2 (rucksacks)
-  (sum (-map #'find-badge (seq-partition rucksacks 3))))
+  (-sum (-map #'find-badge (seq-partition rucksacks 3))))
 
 (expect (solve-03-2 *test-03*) 70)
 (expect (solve-03-2 *input-03*) 2585)
