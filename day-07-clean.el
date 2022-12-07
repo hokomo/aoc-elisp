@@ -1,3 +1,5 @@
+;;; We assume each directory is visited exactly (at most and at least) once.
+
 (defun parse-command (lines)
   (seq-let [command &rest output] (s-split "\n" lines t)
     (cons (s-split " " command) output)))
@@ -8,30 +10,27 @@
 (defun reconstruct-tree (commands)
   ;; NOTE: tree ::= (dir <name> . <tree>*) | (file <name> <size>)
   (let ((stack '()))
-    (cl-flet ((up ()
-                ;; Pop the topmost entry on the stack and add it to its parent.
-                (pcase-let (((and dir `(dir ,name . ,_)) (pop stack))
-                            (`(dir ,_ . ,items) (car stack)))
-                  (setf (car (cl-member name items :test #'string=
-                                                   :key #'cl-second))
-                        dir))))
+    (cl-flet ((add (tree)
+                ;; Add a tree as a child of the top dir on the stack.
+                (push tree (cddr (car stack)))))
       (cl-loop for (command . output) in commands do
         (pcase command
           (`("cd" "..")
-           (up))
+           (add (pop stack)))
           (`("cd" ,name)
            (push `(dir ,name) stack))
           (`("ls")
            (dolist (line output)
-             (push (pcase (s-split " " line)
-                     (`("dir" ,name)
-                      `(dir ,name))
-                     (`(,size ,name)
-                      `(file ,name ,(int size))))
-                   (cddr (car stack)))))))
+             (pcase (s-split " " line)
+               (`("dir" ,_)
+                ;; Ignore, since we infer the existence of the directory from
+                ;; the corresponding `cd' instruction anyway.
+                )
+               (`(,size ,name)
+                (add `(file ,name ,(int size)))))))))
       ;; Pop all the way to the root entry and return it.
       (cl-loop while (cdr stack)
-               do (up)
+               do (add (pop stack))
                finally (return (car stack))))))
 
 (defun size-tree (root)
