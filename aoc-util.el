@@ -38,6 +38,7 @@
   (apply #'cl-mapcar #'list lists))
 
 (defun windows (n seq)
+  ;; NOTE: Like `-partition-in-steps' but works for any sequence.
   (cl-loop for i from 0 below (1+ (- (length seq) n))
            collect (seq-subseq seq i (+ i n))))
 
