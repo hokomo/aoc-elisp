@@ -1,8 +1,8 @@
-;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (aoc-mode 1); -*-
+;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (when (require 'aoc-emacs nil t) (aoc-mode 1)); -*-
 
+(require 'aoc-util)
 (require 'dash)
 (require 's)
-(require 'aoc-util)
 
 (defun parse-block (block)
   (-map #'int (s-split "\n" block t)))

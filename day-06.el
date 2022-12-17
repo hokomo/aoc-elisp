@@ -1,9 +1,9 @@
-;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (aoc-mode 1); -*-
+;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (when (require 'aoc-emacs nil t) (aoc-mode 1)); -*-
 
+(require 'aoc-util)
 (require 'cl-lib)
 (require 'dash)
 (require 's)
-(require 'aoc-util)
 
 (defun read-06 (string)
   (s-trim string))
@@ -14,7 +14,7 @@
 (definput *input-06* #'read-06 "input-06.txt")
 
 (defun find-n-different (n string)
-  (cl-loop for w in (windows n string)
+  (cl-loop for w in (seq-windows n string)
            for i from 0
            when (= (length (cl-delete-duplicates w)) n)
              return i))

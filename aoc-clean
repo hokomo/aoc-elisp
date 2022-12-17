@@ -14,11 +14,15 @@
     (buffer-file-name)))))
 
 (require 'cl-lib)
-;; HACK: Provide `s' and `f' so `aoc-emacs' doesn't fail loading, as they are
-;; not part of the Emacs distribution. The function we need, `aoc-clean-buffer',
-;; doesn't use any of these packages anyway.
-(provide 's)
-(provide 'f)
+
+;; HACK: We want to load `aoc-emacs' to get `aoc-clean-buffer', but the file
+;; pulls in various 3rd party libraries that are tedious to add to the load path
+;; when using Emacs in script mode. Instead, let's just mock them and patch any
+;; functions that cause loading to fail but are not necessary for
+;; `aoc-clean-buffer'.
+(dolist (lib '(aoc-util dash f mmt queue s transient))
+  (provide lib))
+(defmacro transient-define-prefix (&rest _))
 (require 'aoc-emacs)
 
 (when (< (length argv) 1)
@@ -26,8 +30,8 @@
 
 (setq make-backup-files nil)
 
-(let ((filename (cl-first argv)))
-  (let ((inhibit-message t))
-    (with-current-buffer (aoc-clean-buffer (find-file-existing filename))
-      (write-file (expand-file-name
-                   (concat (file-name-base filename) "-clean.el"))))))
+(let ((filename (cl-first argv))
+      (inhibit-message t))
+  (with-current-buffer (aoc-clean-buffer (find-file-existing filename))
+    (write-file (expand-file-name
+                 (concat (file-name-base filename) "-clean.el")))))

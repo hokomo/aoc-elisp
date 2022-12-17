@@ -23,11 +23,11 @@
        (--map (-sort #'range< it))
        (-count #'complete-overlap-p)))
 
-(defun/s overlap-p ([[a b] [c d]])
+(defun/s overlapp ([[a b] [c d]])
   ;; NOTE: Assume the pairs are sorted wrt each other.
   (<= c b))
 
 (defun solve-04-2 (pairs)
   (->> pairs
        (--map (-sort #'range< it))
-       (-count #'overlap-p)))
+       (-count #'overlapp)))

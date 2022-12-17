@@ -1,9 +1,9 @@
-;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (aoc-mode 1); -*-
+;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (when (require 'aoc-emacs nil t) (aoc-mode 1)); -*-
 
+(require 'aoc-util)
 (require 'cl-lib)
 (require 'dash)
 (require 's)
-(require 'aoc-util)
 
 ;;; We assume each directory is visited exactly (at most and at least) once.
 
@@ -37,8 +37,7 @@ $ ls
 4060174 j
 8033020 d.log
 5626152 d.ext
-7214296 k
-")
+7214296 k")
 
 (definput *input-07* #'read-07 "input-07.txt")
 
@@ -66,7 +65,7 @@ $ ls
       ;; Pop all the way to the root entry and return it.
       (cl-loop while (cdr stack)
                do (add (pop stack))
-               finally (return (car stack))))))
+               finally (cl-return (car stack))))))
 
 (defun size-tree (root)
   ;; NOTE: tree ::= (<size> . <tree>*)

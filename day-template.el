@@ -1,9 +1,12 @@
-;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (aoc-mode 1); -*-
+;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (when (require 'aoc-emacs nil t) (aoc-mode 1)); -*-
 
+(require 'aoc-util)
 (require 'cl-lib)
 (require 'dash)
+(require 'heap)
+(require 'ht)
+(require 'queue)
 (require 's)
-(require 'aoc-util)
 
 (defun read-<level> (string)
   )

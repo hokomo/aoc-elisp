@@ -31,7 +31,7 @@
       ;; Pop all the way to the root entry and return it.
       (cl-loop while (cdr stack)
                do (add (pop stack))
-               finally (return (car stack))))))
+               finally (cl-return (car stack))))))
 
 (defun size-tree (root)
   ;; NOTE: tree ::= (<size> . <tree>*)

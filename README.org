@@ -13,6 +13,11 @@
 - [[#file-aoc-emacs-el][Emacs Integration]]
 
 
+- [[#file-day-13-el][Day 13]] ([[#file-day-13-clean-el][clean]])
+- [[#file-day-12-el][Day 12]] ([[#file-day-12-clean-el][clean]])
+- [[#file-day-11-el][Day 11]] ([[#file-day-11-clean-el][clean]])
+- [[#file-day-10-el][Day 10]] ([[#file-day-10-clean-el][clean]])
+- [[#file-day-09-el][Day 09]] ([[#file-day-09-clean-el][clean]])
 - [[#file-day-07-el][Day 07]] ([[#file-day-07-clean-el][clean]])
 - [[#file-day-06-el][Day 06]] ([[#file-day-06-clean-el][clean]])
 - [[#file-day-05-el][Day 05]] ([[#file-day-05-clean-el][clean]])

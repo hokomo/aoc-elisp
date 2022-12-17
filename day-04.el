@@ -1,9 +1,9 @@
-;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (aoc-mode 1); -*-
+;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (when (require 'aoc-emacs nil t) (aoc-mode 1)); -*-
 
+(require 'aoc-util)
 (require 'cl-lib)
 (require 'dash)
 (require 's)
-(require 'aoc-util)
 
 (defun parse-range (range)
   (-map #'int (s-split "-" range)))
@@ -43,14 +43,14 @@
 (expect (solve-04-1 *test-04*) 2)
 (expect (solve-04-1 *input-04*) 509)
 
-(defun/s overlap-p ([[a b] [c d]])
+(defun/s overlapp ([[a b] [c d]])
   ;; NOTE: Assume the pairs are sorted wrt each other.
   (<= c b))
 
 (defun solve-04-2 (pairs)
   (->> pairs
        (--map (-sort #'range< it))
-       (-count #'overlap-p)))
+       (-count #'overlapp)))
 
 (expect (solve-04-2 *test-04*) 4)
 (expect (solve-04-2 *input-04*) 870)

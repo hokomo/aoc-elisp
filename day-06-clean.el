@@ -2,7 +2,7 @@
   (s-trim string))
 
 (defun find-n-different (n string)
-  (cl-loop for w in (windows n string)
+  (cl-loop for w in (seq-windows n string)
            for i from 0
            when (= (length (cl-delete-duplicates w)) n)
              return i))
