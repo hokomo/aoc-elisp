@@ -173,48 +173,62 @@
 ;;; For
 
 (defun for--expand-clause (clause form)
-  (cl-flet ((make-loop (form clauses)
-              `(cl-loop named ,(gensym) ,@clauses do ,form)))
+  (cl-flet ((make-loop (form clauses &optional vars)
+              ;; NOTE: We drop `cl-loop' from CLAUSES because we're using it
+              ;; only to aid indentation.
+              (let ((loop `(cl-loop named ,(gensym) ,@(cdr clauses) do ,form)))
+                (if vars `(let ,vars ,loop) loop))))
     (pcase-exhaustive clause
       (`(:let ,vars)
        `(pcase-let ,vars ,form))
       (`(:let* ,vars)
        `(pcase-let* ,vars ,form))
+      (`(:do . ,forms)
+       `(progn ,@forms ,form))
+      (`(:return ,result . ,return)
+       (cl-destructuring-bind (cond &optional expr) return
+         `(if ,cond (cl-return ,(or expr result)) ,form)))
       (`(:when ,cond)
        `(when ,cond ,form))
       (`(:while ,cond)
        `(while ,cond ,form))
-      (`(:return ,result . ,return)
-       (cl-destructuring-bind (cond &optional expr) return
-         `(if ,cond (cl-return ,(or expr result)) ,form)))
       (`(,(and kind (or :collect :append)) ,result ,expr)
        `(progn
           ,(cl-ecase kind
              (:collect `(push ,expr ,result))
              (:append `(setf ,result (nconc (reverse ,expr) ,result))))
           ,form))
-      (`(,s (:for ,init ,step ,cond))
-       (make-loop form `(for ,s = ,init then ,step while ,cond)))
+      (`(,s (,(or := :step) . ,equals))
+       (cl-destructuring-bind (init &optional step cond) equals
+         (make-loop form `(cl-loop for ,s = ,init
+                                   ,@(and step `(then ,step))
+                                   ,@(and cond `(while ,cond))))))
       (`(,s (:range . ,range))
-       (cl-destructuring-bind (from &optional to step) range
+       (cl-destructuring-bind (from &optional (to nil top) step) range
          (cond
           (step (mmt-once-only (to step)
-                  (->> `(for ,s = ,from then (+ ,s ,step)
-                         while (if (plusp ,step) (< ,s ,to) (> ,s ,to)))
-                       (make-loop form))))
-          (to (make-loop form `(for ,s = ,from to ,to)))
-          (from (make-loop form `(for ,s from 0 below ,from))))))
+                  (make-loop form
+                             `(cl-loop for ,s = ,from then (+ ,s ,step)
+                                       while (or (not ,to)
+                                                 (if (plusp ,step)
+                                                     (< ,s ,to)
+                                                   (> ,s ,to)))))))
+          (top (mmt-once-only (to)
+                 (make-loop form
+                            `(cl-loop for ,s from ,from
+                                      while (or (not ,to) (< ,s ,to))))))
+          (from (make-loop form `(cl-loop for ,s from 0 below ,from))))))
       (`(,s (:in ,list))
-       (make-loop form `(for ,s in ,list)))
+       (make-loop form `(cl-loop for ,s in ,list)))
       (`(,s (:on ,list))
-       (make-loop form `(for ,s on ,list)))
+       (make-loop form `(cl-loop for ,s on ,list)))
       (`(,s (:across ,vector))
-       (make-loop form `(for ,s across ,vector)))
+       (make-loop form `(cl-loop for ,s across ,vector)))
       (`((,k ,v) (:ht ,ht))
-       (make-loop form `(for ,k being the hash-key in ,ht
-                         using (hash-value ,v))))
+       (make-loop form `(cl-loop for ,k being the hash-key in ,ht
+                                   using (hash-value ,v))))
       (`(,s ,(or `(:seq ,seq) seq))
-       (make-loop form `(for ,s being the elements of ,seq))))))
+       (make-loop form `(cl-loop for ,s being the elements of ,seq))))))
 
 (defun for--expand (clauses form)
   (if (null clauses)
@@ -314,8 +328,8 @@
               ,@(cl-loop for i from 0
                          for d in dims
                          collect `(,d (progn
-                                        ,@(when (/= i 0)
-                                            `((setf ,cur (aref ,cur 0))))
+                                        ,@(and (/= i 0)
+                                               `((setf ,cur (aref ,cur 0))))
                                         (length ,cur)))))
          (for-do (,@(cl-loop for s in specs
                              collect `(,s (:range ,(cdr (assoc s axes))))))
