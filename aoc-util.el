@@ -22,6 +22,18 @@
 
 (defalias 'symcat 'symbolicate)
 
+(defun keywordize (sym)
+  (let ((sym (symcat sym)))
+    (if (keywordp sym)
+        sym
+      (symcat ":" sym))))
+
+(defun unkeywordize (sym)
+  (let ((sym (symcat sym)))
+    (if (not (keywordp sym))
+        sym
+      (symcat (substring (symbol-name sym) 1)))))
+
 ;;; Printing
 
 (defun prind (object &rest objects)
@@ -172,6 +184,124 @@
 
 ;;; For
 
+(defun pfor--expand (clauses form)
+  (let ((name nil)
+        (init-done-p nil)
+        (lets '())
+        (iter-done-p nil)
+        (whens '())
+        (collects '())
+        (result (cl-gensym "result"))
+        (loop-clauses '()))
+    (cl-labels ((add-clauses (new)
+                  ;; NOTE: We drop `cl-loop' from NEW because we're using it
+                  ;; only to aid indentation.
+                  (setf loop-clauses (nconc loop-clauses (cdr new))))
+                (add-let (clause vars)
+                  (when init-done-p
+                    (error (cat "A %S clause must appear before any iteration "
+                                "or control clauses")
+                           clause))
+                  (push (list (unkeywordize clause) vars) lets))
+                (add-iter (clause new)
+                  (when iter-done-p
+                    (error (cat "A %S clause must appear before any control "
+                                "clauses")
+                           clause))
+                  (add-clauses new)
+                  (setf init-done-p t))
+                (add-control (new)
+                  (add-clauses new)
+                  (setf init-done-p t
+                        iter-done-p t)))
+      (dolist (clause clauses)
+        (pcase-exhaustive clause
+          (`(:named ,sym)
+           (when name
+             (error "There can be at most one %S clause" :named))
+           (when init-done-p
+             (error (cat "A %S clause must appear before any iteration or "
+                         "control clauses")
+                    :named))
+           (setf name sym))
+          (`(:let ,vars)
+           (add-let :let vars))
+          (`(:let* ,vars)
+           (add-let :let* vars))
+          (`(:do . ,forms)
+           (add-control `(do (progn ,@forms))))
+          (`(:return . ,return)
+           (cl-destructuring-bind (cond &optional expr) return
+             (add-control
+              `(cl-loop do (when ,cond
+                             (cl-return-from ,name ,(or expr result)))))))
+          (`(:when ,cond)
+           (push cond whens)
+           (setf init-done-p t
+                 iter-done-p t))
+          (`(:while ,cond)
+           (add-control `(cl-loop while ,cond)))
+          (`(,(and kind (or :collect :append)) ,expr)
+           (push `(,(unkeywordize kind) ,expr) collects)
+           (setf init-done-p t
+                 iter-done-p t))
+          (`(,s (,(and kind (or := :step)) . ,equals))
+           (cl-destructuring-bind (init &optional step cond) equals
+             (add-iter kind `(cl-loop for ,s = ,init
+                                      ,@(and step `(then ,step))
+                                      ,@(and cond `(while ,cond))))))
+          (`(,s (:range . ,range))
+           (cl-destructuring-bind (from &optional (to nil top) step) range
+             (add-iter
+              :range
+              (cond
+               (step (mmt-with-gensyms (gto gstep)
+                       `(cl-loop with ,gto = ,to
+                                 with ,gstep = ,step
+                                 for ,s = ,from then (+ ,s ,gstep)
+                                 while (or (not ,gto)
+                                           (if (plusp ,gstep)
+                                               (< ,s ,gto)
+                                             (> ,s ,gto))))))
+               (top (mmt-with-gensyms (gto)
+                      `(cl-loop with ,gto = ,to
+                                for ,s from ,from
+                                while (or (not ,gto) (< ,s ,gto)))))
+               (from `(cl-loop for ,s from 0 below ,from))))))
+          (`(,s (:in ,list))
+           (add-iter :in `(cl-loop for ,s in ,list)))
+          (`(,s (:on ,list))
+           (add-iter :on `(cl-loop for ,s on ,list)))
+          (`(,s (:across ,vector))
+           (add-iter :across `(cl-loop for ,s across ,vector)))
+          (`((,k ,v) (:ht ,ht))
+           (add-iter :ht `(cl-loop for ,k being the hash-key in ,ht
+                                     using (hash-value ,v))))
+          (`(,s ,(or `(:seq ,seq) seq))
+           (add-iter :seq `(cl-loop for ,s being the elements of ,seq))))))
+    (let* ((collects (--> collects
+                          (--map (append it `(into ,result)) it)
+                          (-interleave it (-cycle '(and)))
+                          (-flatten-n 1 it)))
+           (form `(cl-loop named ,name
+                           ,@(and (not collects) `(with ,result = nil))
+                           ,@loop-clauses
+                           when ,(if whens `(and ,@whens) t)
+                             ,@collects
+                           do ,form
+                           finally (cl-return-from ,name ,result))))
+      (cl-loop for (kind vars) in lets
+               do (setf form `(,kind ,vars ,form))
+               finally (cl-return form)))))
+
+(defmacro pfor-do (clauses &rest body)
+  (declare (indent 1))
+  (pfor--expand clauses `(progn ,@body)))
+
+(defmacro pfor (clauses &rest body)
+  (declare (indent 1))
+  `(pfor-do (,@clauses (:collect (progn ,@body)))))
+
 (defun for--expand-clause (clause form)
   (cl-flet ((make-loop (form clauses &optional vars)
               ;; NOTE: We drop `cl-loop' from CLAUSES because we're using it
@@ -179,6 +309,12 @@
               (let ((loop `(cl-loop named ,(gensym) ,@(cdr clauses) do ,form)))
                 (if vars `(let ,vars ,loop) loop))))
     (pcase-exhaustive clause
+      (`,(or (and (pred vectorp) vec (let clauses (cl-coerce vec 'list)))
+             `(:par ,clauses))
+       (let ((clauses (if (cl-find :named clauses :key #'car)
+                          clauses
+                        `((:named ,(gensym)) ,@clauses))))
+         `(pfor-do ,clauses ,form)))
       (`(:let ,vars)
        `(pcase-let ,vars ,form))
       (`(:let* ,vars)
