@@ -6,6 +6,9 @@
 (require 'ht)
 (require 's)
 
+;;; We use the point [i j] to represent the location in the i-th row and j-th
+;;; column, starting from the origin [0 0] in the top-left.
+
 (defun parse-rope-move (line)
   (--map (car (read-from-string it)) (s-split " " line)))
 
@@ -34,20 +37,17 @@ U 20")
 
 (definput *input-09* #'read-09 "input-09.txt")
 
-(defun chess-distance (u v)
-  (cl-reduce #'max (vmap #'abs (v2- u v))))
-
 (defvar *rope-dirs*
   (ht ('U [-1 0]) ('D [1 0]) ('L [0 -1]) ('R [0 1])))
 
 (defun make-rope (knots)
-  (make-vector knots (vector 0 0)))
+  (vecify (for ((i (:range knots))) (vector 0 0))))
 
 (defun adjust-spine (rope)
   (cl-loop for k from 1 below (length rope)
            while (> (chess-distance (v. rope (1- k)) (v. rope k)) 1)
            for dir = (v2- (v. rope (1- k)) (v. rope k))
-           for unit = (vmap (-cut clamp -1 1 <>) dir)
+           for unit = (v2clamp [-1 -1] [1 1] dir)
            do (setf (v. rope k) (v2+ (v. rope k) unit))))
 
 (defun simulate-rope (func rope moves)
@@ -60,11 +60,11 @@ U 20")
 
 (defun unique-tails (knots moves)
   (let* ((rope (make-rope knots))
-         (seen (ht ((v. rope -1) t))))
+         (seen (st (v. rope -1))))
     (simulate-rope (lambda (rope)
-                     (setf (h. seen (v. rope -1)) t))
+                     (set-add seen (v. rope -1)))
                    rope moves)
-    (ht-size seen)))
+    (set-size seen)))
 
 (defun solve-09-1 (moves)
   (unique-tails 2 moves))

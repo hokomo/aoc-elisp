@@ -1,4 +1,4 @@
-# -*- eval: (aoc-mode 1); -*-
+;; -*- eval: (add-to-list 'load-path (expand-file-name "")); eval: (when (require 'aoc-emacs nil t) (aoc-mode 1)); -*-
 
 * About
 
@@ -13,11 +13,22 @@
 - [[#file-aoc-emacs-el][Emacs Integration]]
 
 
+- [[#file-day-25-el][Day 25]] ([[#file-day-25-clean-el][clean]])
+- [[#file-day-24-el][Day 24]] ([[#file-day-24-clean-el][clean]])
+- [[#file-day-23-el][Day 23]] ([[#file-day-23-clean-el][clean]])
+- [[#file-day-22-el][Day 22]] ([[#file-day-22-clean-el][clean]])
+- [[#file-day-21-el][Day 21]] ([[#file-day-21-clean-el][clean]])
+- [[#file-day-20-el][Day 20]] ([[#file-day-20-clean-el][clean]])
+- [[#file-day-18-el][Day 18]] ([[#file-day-18-clean-el][clean]])
+- [[#file-day-17-el][Day 17]] ([[#file-day-17-clean-el][clean]])
+- [[#file-day-15-el][Day 15]] ([[#file-day-15-clean-el][clean]])
+- [[#file-day-14-el][Day 14]] ([[#file-day-14-clean-el][clean]])
 - [[#file-day-13-el][Day 13]] ([[#file-day-13-clean-el][clean]])
 - [[#file-day-12-el][Day 12]] ([[#file-day-12-clean-el][clean]])
 - [[#file-day-11-el][Day 11]] ([[#file-day-11-clean-el][clean]])
 - [[#file-day-10-el][Day 10]] ([[#file-day-10-clean-el][clean]])
 - [[#file-day-09-el][Day 09]] ([[#file-day-09-clean-el][clean]])
+- [[#file-day-08-el][Day 08]] ([[#file-day-08-clean-el][clean]])
 - [[#file-day-07-el][Day 07]] ([[#file-day-07-clean-el][clean]])
 - [[#file-day-06-el][Day 06]] ([[#file-day-06-clean-el][clean]])
 - [[#file-day-05-el][Day 05]] ([[#file-day-05-clean-el][clean]])

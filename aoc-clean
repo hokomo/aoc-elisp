@@ -30,7 +30,7 @@
 
 (setq make-backup-files nil)
 
-(let ((filename (cl-first argv))
+(let ((filename (car argv))
       (inhibit-message t))
   (with-current-buffer (aoc-clean-buffer (find-file-existing filename))
     (write-file (expand-file-name

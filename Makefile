@@ -1,4 +1,4 @@
-DAYS := $(shell ls | grep -E day-[[:digit:]]+\.el)
+DAYS := $(shell ls | grep -E ^day-[[:digit:]]+\.el$)
 CLEAN := $(patsubst %.el, %-clean.el, $(DAYS))
 
 .PHONY: all
@@ -13,4 +13,4 @@ push:
 
 .PHONY: clean
 clean:
-	$(RM) $(CLEAN)
+	$(RM) $(CLEAN) day-*.elc

@@ -29,7 +29,7 @@
         (:false (int false)))))
 
 (defun read-11 (string)
-  (cl-map 'vector #'parse-monkey (s-split "\n\n" string)))
+  (vmap #'parse-monkey (s-split "\n\n" string)))
 
 (definput *test-11* #'read-11
   "Monkey 0:
@@ -63,7 +63,7 @@ Monkey 3:
 (definput *input-11* #'read-11 "input-11.txt")
 
 (defun copy-monkeys (monkeys)
-  (cl-map 'vector #'ht-copy monkeys))
+  (vmap #'ht-copy monkeys))
 
 (defun monkey-turn (monkeys n reducef)
   (pcase-let* ((cur (v. monkeys n))

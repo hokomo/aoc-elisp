@@ -16,13 +16,13 @@
 
 (definput *input-<level>* #'read-<level> "input-<level>.txt")
 
-(defun solve-<level>-1 (input)
+(defun solve-<level>-1 (thing)
   )
 
 (expect (solve-<level>-1 *test-<level>*) nil)
 (expect (solve-<level>-1 *input-<level>*) nil)
 
-(defun solve-<level>-2 (input)
+(defun solve-<level>-2 (thing)
   )
 
 (expect (solve-<level>-2 *test-<level>*) nil)

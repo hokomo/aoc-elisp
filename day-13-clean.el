@@ -15,14 +15,13 @@
     (cl-loop for xs = (ensure-list x) then (cdr xs)
              for ys = (ensure-list y) then (cdr ys)
              when (or (not xs) (not ys))
-               do (cl-return
-                    (cond
-                     ((and (not xs) (not ys)) 0)
-                     ((not xs) -1)
-                     (t 1)))
+               return (cond
+                       ((and (not xs) (not ys)) 0)
+                       ((not xs) -1)
+                       (t 1))
              for cmp = (packet-cmp (car xs) (car ys))
              when (/= cmp 0)
-               do (cl-return cmp))))
+               return cmp)))
 
 (defun solve-13-1 (packets)
   (->> (--find-indices (= (apply #'packet-cmp it) -1) packets)
@@ -38,6 +37,6 @@
 (defun solve-13-2 (packets)
   (->> (append (-flatten-n 1 packets) *decoder-packets*)
        (-sort #'packet<)
-       (--find-indices (cl-member it *decoder-packets* :test #'equal))
+       (--find-indices (member it *decoder-packets*))
        (-map #'1+)
        -product))

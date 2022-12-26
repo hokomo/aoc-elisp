@@ -15,7 +15,7 @@
        (-map #'parse-crate-line)
        (apply #'-pad nil)
        transpose
-       (cl-map 'vector (-cut remove nil <>))))
+       (vmap (-cut remove nil <>))))
 
 (defun parse-crate-move (line)
   (let ((groups (rx-let ((n (group (+ digit))))
@@ -42,7 +42,7 @@ move 1 from 1 to 2")
 (definput *input-05* #'read-05 "input-05.txt")
 
 (defun copy-crates (crates)
-  (cl-map 'vector #'copy-list crates))
+  (vmap #'copy-list crates))
 
 (defun simulate-crates (crates movef moves)
   (prog1 crates
@@ -50,10 +50,10 @@ move 1 from 1 to 2")
 
 (defun crates-message (crates movef moves)
   (->> (simulate-crates (copy-crates crates) movef moves)
-       (cl-map 'string #'cl-first)))
+       (cl-map 'string #'car)))
 
 (defun/s move-individual (crates [n from to])
-  ;; HACK: Iterative pop-push. Doubly-linked lists would be nicer.
+  ;; NOTE: Iterative pop-push. Doubly-linked lists would be nicer.
   (dotimes (_ n)
     (push (pop (aref crates from)) (aref crates to))))
 

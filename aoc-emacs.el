@@ -14,6 +14,13 @@
           (kill-ring-yank-pointer kill-ring))
      ,@body))
 
+(defmacro save-selected-window-excursion (&rest body)
+  (mmt-with-gensyms (window state)
+    `(let* ((,window (selected-window))
+            (,state (window-state-get ,window)))
+       (unwind-protect (progn ,@body)
+         (window-state-put ,state ,window)))))
+
 (defun delete-sexp ()
   (save-kill-ring
    (kill-sexp)
@@ -92,36 +99,132 @@
                       '((display-buffer-reuse-window
                          display-buffer-below-selected))))))
 
-;;; AOC Copy
+;;; AOC Loading
 
-(defun aoc-clean-buffer (buffer &optional remove-comments)
-  ;; Should not prefix the buffer name with a space, because uninteresting
-  ;; buffers are not fontified by font-lock. See
+(cl-defun aoc-clean-buffer (buffer &key (require t) (input t) (output t)
+                                     (dev t) (comments nil))
+  ;; Don't prefix the buffer name with a space, because such buffers
+  ;; ("uninteresting buffers") are not fontified by font-lock. See
   ;; https://stackoverflow.com/q/18418079.
   (let ((clean (generate-new-buffer "*temp*")))
     (prog1 clean
       (with-current-buffer clean
         (save-excursion
           (insert-buffer buffer)
+          (goto-char (point-min))
           ;; Remove everything before and including any `require's.
-          (goto-char (point-max))
-          (when (re-search-backward (rx bol "(require") nil t)
-            (beginning-of-line 3)
-            (delete-region (point-min) (point)))
-          ;; Remove `definput' and `expect'.
-          (delete-sexps (rx bol "(definput"))
-          (delete-sexps (rx bol "(expect"))
-          (delete-sexps (rx bol "(display"))
-          (when remove-comments
-            ;; Delete comments.
-            (goto-char (point-min))
-            (while (re-search-forward (rx bol (* blank) ";;") nil t)
-              (goto-char (match-beginning 0))
-              (kill-line)
-              (while (looking-at "\n")
-                (kill-line))))
+          (when require
+            (save-excursion
+              (goto-char (point-max))
+              (when (re-search-backward (rx bol "(require") nil t)
+                (next-line 2)
+                (beginning-of-line)
+                (delete-region (point-min) (point)))))
+          ;; Remove input forms (`definput').
+          (when input
+            (save-excursion (delete-sexps (rx bol "(definput"))))
+          ;; Remove output forms (`expect', `display', `with-profiling' and
+          ;; `with-sprofiling').
+          (when output
+            (save-excursion
+              (delete-sexps
+               (rx bol "(" (or "expect" "display"
+                               (seq "with-" (? "s") "profiling"))))))
+          ;; Remove "dev" forms useful during development (`comment').
+          (when dev
+            (save-excursion
+              (save-excursion (delete-sexps (rx bol "(comment")))))
+          ;; Remove comments.
+          (when comments
+            (save-excursion
+              (goto-char (point-min))
+              (while (re-search-forward (rx bol (* blank) ";;") nil t)
+                (goto-char (match-beginning 0))
+                (kill-line)
+                (while (looking-at "\n")
+                  (kill-line)))))
           (delete-trailing-whitespace))
         (funcall (buffer-local-value 'major-mode buffer))))))
+
+(cl-defun aoc-call-with-clean (func &rest keys &allow-other-keys)
+  (let* ((buffer (current-buffer))
+         (clean (apply #'aoc-clean-buffer buffer keys)))
+    (save-selected-window-excursion
+     (with-silent-modifications
+       ;; NOTE: Perform the operation on the clean version of the text but still
+       ;; within the original buffer, so that any location information is
+       ;; preserved.
+       (buffer-swap-text clean)
+       (unwind-protect (save-selected-window-excursion (funcall func clean))
+         (buffer-swap-text clean)
+         (kill-buffer clean))))))
+
+(cl-defun aoc-compile-with-clean (func &rest keys &allow-other-keys)
+  (emacs-lisp--before-compile-buffer)
+  (apply #'aoc-call-with-clean
+         (lambda (original)
+           ;; Write out the clean version to disk so that file compilation
+           ;; functions get the real thing.
+           (save-buffer)
+           ;; NOTE: Temporarily swap with the original to avoid the user seeing
+           ;; the temporary clean version as a result of whatever FUNC might
+           ;; decide to do (e.g. `emacs-lisp-native-compile-and-load' displays
+           ;; its compilation buffer which can trigger a redisplay of our
+           ;; buffer). Don't write anything to disk though, and pretend there
+           ;; were no modifications to the buffer (e.g. so we don't get asked to
+           ;; save).
+           (with-silent-modifications
+             (buffer-swap-text original))
+           (unwind-protect (funcall func original)
+             ;; Once done, write out the original version to disk and undo the
+             ;; swap for `aoc-call-with-clean'.
+             (save-buffer)
+             (with-silent-modifications
+               (buffer-swap-text original))))
+         keys))
+
+(defun aoc-load ()
+  (interactive)
+  (aoc-call-with-clean (lambda (_) (eval-buffer)) :require nil :input nil))
+
+(defun aoc-byte-compile-load ()
+  (interactive)
+  (aoc-compile-with-clean
+   (lambda (_) (emacs-lisp-byte-compile-and-load)) :require nil :input nil))
+
+(defun aoc-native-compile-load ()
+  (interactive)
+  (aoc-compile-with-clean
+   (lambda (_) (emacs-lisp-native-compile-and-load)) :require nil :input nil))
+
+;;; AOC Run
+
+(defun aoc-run (&optional n)
+  (interactive "p")
+  (let ((regexp (rx (or "(expect" "(display"))))
+    (if (equal current-prefix-arg '(16))
+        (save-excursion
+          (goto-char (point-min))
+          (cl-loop while (re-search-forward regexp nil t)
+                   do (eval-defun nil)))
+      (let ((arg current-prefix-arg))
+        (when (called-interactively-p 'any)
+          (cond
+           ((equal arg '(4))
+            (setf n 1))
+           ((minusp n)
+            (setf n (abs n)
+                  arg '(4)))
+           (t
+            (setf arg nil))))
+        (save-excursion
+          (goto-char (point-min))
+          (cl-loop repeat n
+                   always (re-search-forward regexp nil t)
+                   finally (let ((current-prefix-arg arg))
+                             (call-interactively #'eval-defun))))))))
+
+;;; AOC Copy
 
 (defun aoc-wrap-buffer (beg end type &optional lang)
   (let* ((marker (cl-ecase type
@@ -137,9 +240,9 @@
         (goto-char (point-max))
         (insert marker)))))
 
-(defun aoc-copy (buffer &optional remove-comments)
+(defun aoc-copy (buffer &optional clean-comments)
   (interactive (list (current-buffer) current-prefix-arg))
-  (with-current-buffer (aoc-clean-buffer buffer remove-comments)
+  (with-current-buffer (aoc-clean-buffer buffer :comments clean-comments)
     (let* ((name (symbol-name major-mode))
            (lang (and (string-match (rx (*? nonl) (group (+ (not "-"))) "-mode")
                                     name)
@@ -169,9 +272,9 @@
         (previous-line)
         (beginning-of-line)
         (insert
-         (format
-          "\n- [[#file-day-%02d-el][Day %02d]] ([[#file-day-%02d-clean-el][clean]])"
-          day day day))))))
+         (format "\n- [[#file-day-%02d-el][Day %02d]] \
+([[#file-day-%02d-clean-el][clean]])"
+                 day day day))))))
 
 ;;; AOC Mode
 
@@ -182,8 +285,23 @@
   (setq-local eval-expression-print-length 20
               eval-expression-print-level 10))
 
+(define-key aoc-mode-map (kbd "C-c C-l") #'aoc-load)
+(define-key aoc-mode-map (kbd "C-c C-b") #'aoc-byte-compile-load)
+(define-key aoc-mode-map (kbd "C-c C-n") #'aoc-native-compile-load)
+(define-key aoc-mode-map (kbd "C-c C-r") #'aoc-run)
 (define-key aoc-mode-map (kbd "C-c C-c") #'aoc-copy)
 (define-key aoc-mode-map (kbd "C-c C-e") #'aoc-readme-insert)
+(define-key aoc-mode-map (kbd "C-c C-d") #'toggle-debug-on-error)
+
+(with-eval-after-load 'core-spacemacs
+  (spacemacs/set-leader-keys-for-minor-mode 'aoc-mode
+    "l" #'aoc-load
+    "b" #'aoc-byte-compile-load
+    "n" #'aoc-native-compile-load
+    "r" #'aoc-run
+    "C" #'aoc-copy
+    "x" #'aoc-readme-insert
+    "d" #'toggle-debug-on-error))
 
 ;;; Display
 
@@ -275,9 +393,9 @@
       (setq display--done t)
       (display-exit)))
   ;; NOTE: If an error occurs after we return control from this function,
-  ;; entering the debugger usually ends up clobbering Transient's
-  ;; transient keymap. In this case the user should call `display-exit' to
-  ;; get rid of the transient.
+  ;; entering the debugger usually ends up clobbering Transient's transient
+  ;; keymap. In this case the user should manually call `display-exit' to get
+  ;; rid of the transient.
   )
 
 (cl-defun call-with-display (name body &key wait)
@@ -290,9 +408,9 @@
     (prog1 result
       (when (and name (not existsp))
         (cl-pushnew buffer display-buffers))
-      (funcall (if wait #'display-wait #'display) buffer)
-      (when (not name)
-        (kill-buffer buffer)))))
+      (unwind-protect (funcall (if wait #'display-wait #'display) buffer)
+        (when (not name)
+          (kill-buffer buffer))))))
 
 (defun display-underscore-components (symbol)
   (let ((regexp (rx bos "_" (group (*? nonl)) (group (? "?")) eos)))
@@ -313,5 +431,23 @@
                `(list ,name ,@flags :wait ,wait))
               (expr `(list ,expr ,@flags)))
          (apply #'call-with-display ,name (lambda () ,@body) ,rest)))))
+
+;;; Graphviz
+
+(defun call-with-graphviz (func filename)
+  (require 'graphviz-dot-mode)
+  (let ((original (current-buffer))
+        (buffer (find-file-noselect filename)))
+    (prog1 buffer
+      (with-buffer buffer
+        (erase-buffer)
+        (funcall func)
+        (save-buffer)
+        (graphviz-dot-preview)
+        (switch-to-buffer original)))))
+
+(defmacro with-graphviz (filename &rest body)
+  (declare (indent 1))
+  `(call-with-graphviz (lambda () ,@body) ,filename))
 
 (provide 'aoc-emacs)

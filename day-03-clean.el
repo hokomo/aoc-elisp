@@ -12,13 +12,13 @@
   (-map #'parse-rucksack (s-split "\n" string t)))
 
 (defun/s find-shared ([x y])
-  (cl-first (seq-intersection x y)))
+  (car (seq-intersection x y)))
 
 (defun solve-03-1 (rucksacks)
   (-sum (-map #'find-shared rucksacks)))
 
 (defun find-badge (group)
-  (cl-first (cl-reduce #'seq-intersection (-map #'join group))))
+  (car (cl-reduce #'seq-intersection (-map #'join group))))
 
 (defun solve-03-2 (rucksacks)
   (-sum (-map #'find-badge (seq-partition rucksacks 3))))

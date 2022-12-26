@@ -7,8 +7,11 @@
 (require 'queue)
 (require 's)
 
+;;; We use the point [i j] to represent the location in the i-th row and j-th
+;;; column, starting from the origin [0 0] in the top-left.
+
 (defun read-12 (string)
-  (cl-coerce (s-split "\n" string t) 'vector))
+  (vecify (s-split "\n" string t)))
 
 (definput *test-12* #'read-12
   "Sabqponm
@@ -22,7 +25,7 @@ abdefghi")
 (defun hill-find (hill c)
   (with-tensor (i j) hill
     (when (= (v. hill i j) c)
-      (cl-return (vector i j)))))
+      (cl-return `[,i ,j]))))
 
 (defun hill-elevation (hill pos)
   (pcase (v2.. hill pos)
@@ -35,7 +38,7 @@ abdefghi")
 
 (defun hill-neighbors (hill reachf pos)
   (for ((:let ((dims (vdims hill))))
-        (dir (cl-load-time-value (h. *neighbors-2* 4)))
+        (dir (h. *neighbors-2* 4))
         (:let ((n (v2+ pos dir))))
         (:when (and (v2< [-1 -1] n dims) (funcall reachf hill pos n))))
     n))
@@ -43,16 +46,16 @@ abdefghi")
 (defun hill-steps (hill start reachf pred)
   (let ((start (hill-find hill start))
         (q (queue-create))
-        (seen (ht)))
+        (seen (st)))
     (queue-append q (list start 0))
-    (setf (h. seen start) t)
+    (set-add seen start)
     (for-do ((:while (not (queue-empty q)))
              (:let ((`(,pos ,steps) (queue-dequeue q))))
              (:return (funcall pred pos) steps)
              (n (:in (hill-neighbors hill reachf pos)))
-             (:when (not (h. seen n))))
+             (:when (not (s. seen n))))
       (queue-append q (list n (1+ steps)))
-      (setf (h. seen n) t))))
+      (set-add seen n))))
 
 (defun solve-12-1 (hill)
   (hill-steps hill ?S #'hill-reachable
