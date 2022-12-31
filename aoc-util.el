@@ -842,11 +842,25 @@
 
 (defalias 'set-size 'ht-size)
 
+(defalias 'set-empty-p 'ht-empty-p)
+
 (defun set-add (set key)
   (ht-set set key t))
 
+(defun set-with (set &rest keys)
+  (let ((new (ht-copy set)))
+    (prog1 new
+      (dolist (key keys)
+        (set-add new key)))))
+
 (defun set-remove (set key)
   (ht-remove set key))
+
+(defun set-without (set &rest keys)
+  (let ((new (ht-copy set)))
+    (prog1 new
+      (dolist (key keys)
+        (set-remove new key)))))
 
 (defalias 's. 'ht-contains-p)
 
@@ -943,6 +957,37 @@
      ;; the rest. Forcing the expansion is important so that `with-sref' doesn't
      ;; erroneously treat the special `with-vref' fields as struct slots.
      ,(macroexpand-all `(with-vref ,@body) macroexpand-all-environment)))
+
+;;; Graphs
+
+(cl-defstruct (graph (:constructor graph-create (adjacent &optional nodes))
+                     (:copier nil))
+  nodes adjacent)
+
+(defun graph-floyd-warshall (graph)
+  (let ((nodes (graph-nodes graph))
+        (dist (ht)))
+    (prog1 dist
+      (for-do ((u nodes))
+        (setf (h. dist u) (ht (u 0)))
+        (for-do (((v cost) (funcall (graph-adjacent graph) u)))
+          (setf (h. dist u v) (or cost 1))))
+      (for-do ((k nodes)
+               (i nodes)
+               (j nodes))
+        (when-let ((d1 (h. dist i k))
+                   (d2 (h. dist k j)))
+          (let ((d (h. dist i j)))
+            (setf (h. dist i j)
+                  (if d (min d (+ d1 d2)) (+ d1 d2)))))))))
+
+;;; Memoization
+
+(defun memoize (func)
+  (let ((table (make-hash-table :test 'equal)))
+    (lambda (&rest args)
+      (let ((value (ht-get table args)))
+        (or value (setf (ht-get table args) (apply func args)))))))
 
 ;;; Buffers
 
