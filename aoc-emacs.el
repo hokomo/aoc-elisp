@@ -153,7 +153,8 @@
      (with-silent-modifications
        ;; NOTE: Perform the operation on the clean version of the text but still
        ;; within the original buffer, so that any location information is
-       ;; preserved.
+       ;; preserved. We silence modifications because swapping the buffer text
+       ;; sets the modified flag.
        (buffer-swap-text clean)
        (unwind-protect (save-selected-window-excursion (funcall func clean))
          (buffer-swap-text clean)
@@ -176,10 +177,12 @@
            (with-silent-modifications
              (buffer-swap-text original))
            (unwind-protect (funcall func original)
-             ;; Once done, write out the original version to disk and undo the
-             ;; swap for `aoc-call-with-clean'.
-             (save-buffer)
+             ;; NOTE: Once done, write out the original version to disk and undo
+             ;; the swap for `aoc-call-with-clean'. We set the buffer modified
+             ;; flag in order to force `save-buffer' to save.
              (with-silent-modifications
+               (set-buffer-modified-p t)
+               (save-buffer)
                (buffer-swap-text original))))
          keys))
 
