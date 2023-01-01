@@ -19,6 +19,7 @@
 - [[#file-day-22-el][Day 22]] ([[#file-day-22-clean-el][clean]])
 - [[#file-day-21-el][Day 21]] ([[#file-day-21-clean-el][clean]])
 - [[#file-day-20-el][Day 20]] ([[#file-day-20-clean-el][clean]])
+- [[#file-day-19-el][Day 19]] ([[#file-day-19-clean-el][clean]])
 - [[#file-day-18-el][Day 18]] ([[#file-day-18-clean-el][clean]])
 - [[#file-day-17-el][Day 17]] ([[#file-day-17-clean-el][clean]])
 - [[#file-day-16-el][Day 16]] ([[#file-day-16-clean-el][clean]])
