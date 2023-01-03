@@ -1,16 +1,3 @@
-;;; We use the point [i j] to represent the location in the i-th row and j-th
-;;; column, starting from the origin [0 0] in the top-left.
-;;;
-;;; We don't attempt to implement fully general parsing of an arbitrary cube net
-;;; but just assume the pattern will always be as the one given in the input:
-;;;
-;;; _##
-;;; _#_
-;;; ##_
-;;; #__
-;;;
-;;; See https://mathworld.wolfram.com/Net.html.
-
 (defun parse-board-grid (string)
   (let* ((lines (s-split "\n" string t))
          (max (-max (-map #'length lines))))
@@ -48,7 +35,6 @@
       (let ((c (v. grid i j))
             (p `[,i ,j]))
         (unless (= c ?\s)
-          ;; Rowspans
           (cl-symbol-macrolet ((rowspan (h. rowspans i)))
             (unless rowspan
               (setf rowspan (vector nil nil)))
@@ -58,7 +44,6 @@
                 (setf rowspan.a j))
                ((or (= j (1- n)) (= (v. grid i (1+ j)) ?\s))
                 (setf rowspan.b j)))))
-          ;; Colspans
           (cl-symbol-macrolet ((colspan (h. colspans j)))
             (unless colspan
               (setf colspan (vector nil nil)))
@@ -149,5 +134,3 @@
 (defun/s solve-22-2 ([grid moves] side)
   (seq-let [map start] (map-create grid)
     (apply #'map-password (map-walk (cube-wrap-func side) map start moves))))
-
-;; NOTE: This solution is not general enough to handle the example.

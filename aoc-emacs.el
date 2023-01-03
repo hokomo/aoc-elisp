@@ -102,7 +102,7 @@
 ;;; AOC Loading
 
 (cl-defun aoc-slim-buffer (buffer &key (require t) (input t) (output t)
-                                    (dev t) (comments nil))
+                                    (dev t) (comments t))
   ;; Don't prefix the buffer name with a space, because such buffers
   ;; ("uninteresting buffers") are not fontified by font-lock. See
   ;; https://stackoverflow.com/q/18418079.

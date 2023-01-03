@@ -1,6 +1,3 @@
-;;; We use the point [i j] to represent the location in the i-th row and j-th
-;;; column, starting from the origin [0 0] in the top-left.
-
 (defun read-23 (string)
   (vecify (s-split "\n" string t)))
 
@@ -30,13 +27,11 @@
 (defun step-elves (elves sides)
   (let ((targets (st))
         (counts (st)))
-    ;; Compute the new targets.
     (for-do ((e (:st elves))
              (:let ((target (elf-target elves sides e))))
              (:when target))
       (setf (h. targets e) target
             (h. counts target) (1+ (gethash target counts 0))))
-    ;; Move the elves.
     (and (not (ht-empty-p targets))
          (let ((next (st)))
            (prog1 next

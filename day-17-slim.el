@@ -1,8 +1,3 @@
-;;; We use the point [x y] to represent the location in the y-th row and x-th
-;;; column, starting from the origin [0 0] in the bottom-left.
-;;;
-;;; The floor of the chamber spans from [0 0] to [6 0].
-
 (defun read-17 (string)
   (s-trim string))
 
@@ -112,8 +107,6 @@
          (with-svref rock
            (let ((dh (- (max* h rock.vmax.y) (or h 0))))
              (if missing
-                 ;; `missing' has been set, so it's time to simulate the few
-                 ;; remaining steps.
                  (if (zerop missing)
                      (cl-return (1+ done))
                    (setf done (+ done dh)
@@ -121,9 +114,6 @@
                (let ((state (list rock.type (chamber-profile chamber rock)
                                   i dh)))
                  (if (s. seen state)
-                     ;; We've detected a cycle. Compute the period and shortcut
-                     ;; as much computation as we can, and then set `missing' to
-                     ;; the remaining number of steps.
                      (pcase-let* ((`(,init-k ,init-h) (h. info state))
                                   (rest (- 1000000000000 init-k))
                                   (period (- k init-k))
@@ -131,7 +121,6 @@
                        (setf missing (mod rest period)
                              done (+ init-h (* reps (- h init-h)))
                              done (if (zerop missing) done (1+ done))))
-                   ;; We still haven't detected a cycle. Keep memorizing.
                    (set-add seen state)
                    (setf (h. info state) (list k h))))))))
        1000000000000

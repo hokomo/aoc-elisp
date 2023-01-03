@@ -1,42 +1,3 @@
-;;; The code generalizes to N different resources and robots. We assume the i-th
-;;; robot within a blueprint produces exactly 1 i-th resource per minute, and
-;;; that the goal is to maximize the production of the (N - 1)-th resource.
-;;;
-;;; For both parts, we use a dynamic programming approach with memoization. Our
-;;; state consists of the remaining time, the current inventory, and the current
-;;; "rates" (current amount of built robots).
-;;;
-;;; We employ 3 optimizations, roughly from least to most important:
-;;;
-;;; - At every step, we branch into trying to build each type of robot next. We
-;;;   do this by calculating the amount of time we might have to wait first in
-;;;   order to accumulate enough resources to build the robot. This allows us to
-;;;   skip over multiple time units at a time and do away with a "do nothing"
-;;;   action that we would need if we were to branch 1 time unit at a time.
-;;;
-;;; - We never attempt to build more non-geode robots than we need. Since we can
-;;;   only build 1 robot at a time and building each one takes 1 minute, it only
-;;;   ever makes sense to build as many i-th robots as is the maximum amount of
-;;;   the i-th resource required to build any robot. Building more than that
-;;;   threshold would mean that the robots would just keep accumulating
-;;;   leftovers that we wouldn't have time to spend.
-;;;
-;;;   We can even improve that a little bit by also taking into account the
-;;;   current amount of the i-th resource and the amount of it we would
-;;;   accumulate until the end with the current number of i-th robots. If that
-;;;   quantity is higher than what we could ever possibly spend by building any
-;;;   robot that requires the highest amount of the i-th resource at every turn
-;;;   until the end, then there's no point in building any more of i-th robots.
-;;;
-;;; - We keep track of the globally best solution so far and use it to
-;;;   immediately discard branches that couldn't possibly compete with it, even
-;;;   if they were to build 1 geode robot every turn until the end.
-;;;
-;;;   Note that keeping track of the highest amount of geodes achieved *up to
-;;;   each time unit* is not the same and is not correct, as a branch might end
-;;;   up speeding up later on and beat a solution that had a higher count early
-;;;   on.
-
 (defvar *blueprint-regexp*
   (rx-let ((n (group (+ digit))))
     (rx "Blueprint " n ": Each ore robot costs " n " ore. \
@@ -67,8 +28,6 @@ Each geode robot costs " n " ore and " n " obsidian.")))
         (:let ((wait (robot-wait inv rates cost))))
         (:when (and wait
                     (< wait time)
-                    ;; Build as many geode robots as possible, but only as many
-                    ;; i-th robots as possibly needed.
                     (or (= i (1- n))
                         (< (+ (v. inv i) (* (v. rates i) time))
                            (* (v. maxs i) time)))))
@@ -84,11 +43,6 @@ Each geode robot costs " n " ore and " n " obsidian.")))
         (rec nil))
     (setf rec (memoize
                (lambda (time inv rates)
-                 ;; Return immediately if this branch has no chance of improving
-                 ;; upon the current best, even if it could build a geode bot
-                 ;; every turn until the end (in that case, the number of geodes
-                 ;; acquired at each step *after the first* follows the
-                 ;; progression 1, 2, 3, ...).
                  (if (<= (+ (v. inv (1- n))
                             (* (v. rates (1- n)) time)
                             (* (sum-n (1- time))))

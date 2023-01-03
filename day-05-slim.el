@@ -33,7 +33,6 @@
        (cl-map 'string #'car)))
 
 (defun/s move-individual (crates [n from to])
-  ;; NOTE: Iterative pop-push. Doubly-linked lists would be nicer.
   (dotimes (_ n)
     (push (pop (aref crates from)) (aref crates to))))
 

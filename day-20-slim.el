@@ -28,13 +28,9 @@
          (value (ring-node-value node)))
     (unless (zerop value)
       (with-sref ring-node
-        ;; NOTE: Remove the number from the ring first.
         (setf node.prev.next node.next
               node.next.prev node.prev)
         (let* ((n (if (plusp value) value (1- value)))
-               ;; NOTE: Use `%' so that the sign of the dividend is preserved.
-               ;; Also, reduce by length - 1, not length, as that's the number
-               ;; of *moves* it takes to wrap around (fencepost principle).
                (n (% n (1- (length ring))))
                (nprev (ring-follow node n))
                (nnext nprev.next))
@@ -58,8 +54,6 @@
 (defun solve-20-1 (numbers)
   (grove-coordinates (ring-mix (ring-create numbers))))
 
-;; NOTE: Figure out why this thing is so slow, even with the right data
-;; structure.
 (defun solve-20-2 (numbers)
   (-> (ring-create (vmap (-cut * <> 811589153) numbers))
       (ring-mix 10)

@@ -1,12 +1,3 @@
-;;; For both parts, we use a dynamic programming approach with memoization. Our
-;;; state consists of the remaining time, the current valve position, and the
-;;; set of all still-closed non-zero-flow valves. At every step, we branch into
-;;; trying to open each of the valves in our set recursively and take the
-;;; maximum of their solutions.
-;;;
-;;; For part 2 specifically, we encode the sets as bitsets in order to lower the
-;;; memory consumption.
-
 (defvar *valve-regexp*
   (rx-let ((valve (+ (any "A-Z"))))
     (rx "Valve " (group valve) " has flow rate=" (group (+ digit)) ";"

@@ -1,6 +1,3 @@
-;;; We use the point [i j] to represent the location in the i-th row and j-th
-;;; column, starting from the origin [0 0] in the top-left.
-
 (defun read-12 (string)
   (vecify (s-split "\n" string t)))
 

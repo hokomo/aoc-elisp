@@ -8,7 +8,6 @@
   (-map #'parse-pair (s-split "\n" string t)))
 
 (defun/s complete-overlap-p ([x y])
-  ;; NOTE: Assume the ranges are sorted.
   (with-vref (or (>= x.b y.b) (and (= y.a x.a) (>= y.b x.b)))))
 
 (defun solve-04-1 (pairs)
@@ -17,7 +16,6 @@
        (-count #'complete-overlap-p)))
 
 (defun/s overlapp ([x y])
-  ;; NOTE: Assume the ranges are sorted.
   (with-vref (<= y.a x.b)))
 
 (defun solve-04-2 (pairs)

@@ -1,7 +1,3 @@
-;;; For part 2 we assume all of the divisors will always be coprime (relatively
-;;; prime), so that we can apply the Chinese Remainder Theorem and reduce all of
-;;; the worry levels modulo the product of the divisors.
-
 (defvar *monkey-regexp*
   (rx "Monkey " (group (+ digit)) ":
   Starting items: " (group (* (+ digit) (? ", "))) "

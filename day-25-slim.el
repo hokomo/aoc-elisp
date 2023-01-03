@@ -1,13 +1,3 @@
-;;; The numeral system used is called balanced quinary. Rather than perform
-;;; addition directly in balanced quinary, we convert to and from decimal, just
-;;; for fun.
-;;;
-;;; For an n-balanced quinary system, conversion from decimal is done by first
-;;; converting to a standard base n system, and then "carrying forward" the
-;;; digits.
-;;;
-;;; See https://www.ias.ac.in/article/fulltext/reso/023/12/1395-1410.
-
 (defun read-25 (string)
   (s-split "\n" string t))
 

@@ -1,5 +1,3 @@
-;;; We assume each directory is visited exactly (at most and at least) once.
-
 (defun parse-command (lines)
   (seq-let [command &rest output] (s-split "\n" lines t)
     (cons (s-split " " command) output)))
@@ -8,10 +6,8 @@
   (-map #'parse-command (s-split (rx "$ ") string t)))
 
 (defun reconstruct-tree (commands)
-  ;; NOTE: tree ::= (dir <name> . <tree>*) | (file <name> <size>)
   (let ((stack '()))
     (cl-flet ((add (tree)
-                ;; Add a tree as a child of the top dir on the stack.
                 (push tree (cddr (car stack)))))
       (cl-loop for (command . output) in commands do
         (pcase command
@@ -23,18 +19,14 @@
            (dolist (line output)
              (pcase (s-split " " line)
                (`("dir" ,_)
-                ;; Ignore, since we infer the existence of the directory from
-                ;; the corresponding `cd' instruction anyway.
                 )
                (`(,size ,name)
                 (add `(file ,name ,(int size)))))))))
-      ;; Pop all the way to the root entry and return it.
       (cl-loop while (cdr stack)
                do (add (pop stack))
                finally (cl-return (car stack))))))
 
 (defun size-tree (root)
-  ;; NOTE: tree ::= (<size> . <tree>*)
   (pcase root
     (`(file ,_ ,size)
      size)

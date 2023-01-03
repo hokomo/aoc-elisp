@@ -1,6 +1,3 @@
-;;; We use the point [i j] to represent the location in the i-th row and j-th
-;;; column, starting from the origin [0 0] in the top-left.
-
 (defun read-24 (string)
   (vecify (s-split "\n" string t)))
 
@@ -13,8 +10,6 @@
           `[,(1- m) ,(cl-position ?. (v. valley (1- m)))])))
 
 (defun blizzard-exists-p (valley p time)
-  ;; NOTE: P must be a position *within* the walls, i.e. not the start or the
-  ;; end, or any of the walls.
   (cl-loop with dims = (vdims valley)
            with vmax = (v2- dims [2 2])
            with vtime = `[,time ,time]

@@ -1,13 +1,3 @@
-;;; We use the point [x y] to represent the location in the y-th row and x-th
-;;; column, starting from the origin [0 0] in the top-left.
-;;;
-;;; Let's call the area covered by each sensor a "diamond" (a circle in taxicab
-;;; geometry). For part 2, the unique point has to be squished between 4
-;;; diamonds. In fact, it will lie on the intersection of 2 lines, each one
-;;; tracing the immediate exterior of 2 out of 4 diamonds. Therefore, all we
-;;; have to do is compute the exterior lines of all diamonds, find those that
-;;; are shared between at least 2, and inspect their intersections.
-
 (defun parse-sensor (line)
   (seq-let [sx sy bx by]
       (-map #'int (cdr (s-match (rx-let ((n (group (? "-") (+ digit))))
@@ -20,15 +10,6 @@
   (-map #'parse-sensor (s-split "\n" string t)))
 
 (defun/s sensor-range ([sensor beacon] y)
-  ;; NOTE:
-  ;;
-  ;; d = taxi-distance(s, b)
-  ;;
-  ;; taxi-distance(s, [x y]) <= taxi-distance(s, b)
-  ;; abs(sx - x) + abs(sy - y) <= d
-  ;; abs(sx - x) <= d - abs(sy - y)
-  ;; -(d - abs(sy - y)) <= x - sx <= d - abs(sy - y)
-  ;; -(d - abs(sy - y)) + sx <= x <= d - abs(sy - y) + sx
   (with-vref
     (let* ((d (taxi-distance sensor beacon))
            (diff (- d (abs (- sensor.y y))))
@@ -64,10 +45,8 @@
        (count-occupied pairs intervals y))))
 
 (defun/s exterior-lines ([sensor beacon])
-  ;; NOTE: Each pair [a b] represents the line y = a x + b.
   (let ((d (taxi-distance sensor beacon)))
     (with-vref
-      ;; Return the lines (top-left top-right bottom-right bottom-left).
       (list `[1 ,(- (- sensor.y d 1) sensor.x)]
             `[-1 ,(+ (- sensor.y d 1) sensor.x)]
             `[1 ,(- (+ sensor.y d 1) sensor.x)]

@@ -1,6 +1,3 @@
-;; HACK: For part 2, the input is small enough that we just create a bounding
-;; box and fill out the whole exterior using a BFS.
-
 (defun parse-droplet (line)
   (vmap #'int (s-split "," line)))
 
