@@ -6,7 +6,7 @@
 (require 's)
 
 ;;; The code generalizes to N different resources and robots. We assume the i-th
-;;; robot within a blueprint produces exactly 1 i-th resource per minute, and
+;;; robot within a blueprint produces exactly 1 i-th resource per time unit, and
 ;;; that the goal is to maximize the production of the (N - 1)-th resource.
 ;;;
 ;;; For both parts, we use a dynamic programming approach with memoization. Our
@@ -22,11 +22,11 @@
 ;;;   action that we would need if we were to branch 1 time unit at a time.
 ;;;
 ;;; - We never attempt to build more non-geode robots than we need. Since we can
-;;;   only build 1 robot at a time and building each one takes 1 minute, it only
-;;;   ever makes sense to build as many i-th robots as is the maximum amount of
-;;;   the i-th resource required to build any robot. Building more than that
-;;;   threshold would mean that the robots would just keep accumulating
-;;;   leftovers that we wouldn't have time to spend.
+;;;   only build 1 robot at a time and building each one takes 1 time unit, it
+;;;   only ever makes sense to build as many i-th robots as is the maximum
+;;;   amount of the i-th resource required to build any robot. Building more
+;;;   than that threshold would mean that the robots would just keep
+;;;   accumulating leftovers that we wouldn't have time to spend.
 ;;;
 ;;;   We can even improve that a little bit by also taking into account the
 ;;;   current amount of the i-th resource and the amount of it we would
