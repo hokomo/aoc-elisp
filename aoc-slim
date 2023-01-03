@@ -30,6 +30,6 @@
 (dolist (filename argv)
   (let ((inhibit-message t)
         (make-backup-files nil))
-    (with-current-buffer (aoc-clean-buffer (find-file-existing filename))
+    (with-current-buffer (aoc-slim-buffer (find-file-existing filename))
       (write-file (expand-file-name
-                   (concat (file-name-base filename) "-clean.el"))))))
+                   (concat (file-name-base filename) "-slim.el"))))))

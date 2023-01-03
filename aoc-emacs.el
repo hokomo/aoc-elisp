@@ -101,14 +101,14 @@
 
 ;;; AOC Loading
 
-(cl-defun aoc-clean-buffer (buffer &key (require t) (input t) (output t)
-                                     (dev t) (comments nil))
+(cl-defun aoc-slim-buffer (buffer &key (require t) (input t) (output t)
+                                    (dev t) (comments nil))
   ;; Don't prefix the buffer name with a space, because such buffers
   ;; ("uninteresting buffers") are not fontified by font-lock. See
   ;; https://stackoverflow.com/q/18418079.
-  (let ((clean (generate-new-buffer "*temp*")))
-    (prog1 clean
-      (with-current-buffer clean
+  (let ((slim (generate-new-buffer "*temp*")))
+    (prog1 slim
+      (with-current-buffer slim
         (save-excursion
           (insert-buffer buffer)
           (goto-char (point-min))
@@ -146,29 +146,29 @@
           (delete-trailing-whitespace))
         (funcall (buffer-local-value 'major-mode buffer))))))
 
-(cl-defun aoc-call-with-clean (func &rest keys &allow-other-keys)
+(cl-defun aoc-call-with-slim (func &rest keys &allow-other-keys)
   (let* ((buffer (current-buffer))
-         (clean (apply #'aoc-clean-buffer buffer keys)))
+         (slim (apply #'aoc-slim-buffer buffer keys)))
     (save-selected-window-excursion
      (with-silent-modifications
-       ;; NOTE: Perform the operation on the clean version of the text but still
+       ;; NOTE: Perform the operation on the slim version of the text but still
        ;; within the original buffer, so that any location information is
        ;; preserved. We silence modifications because swapping the buffer text
        ;; sets the modified flag.
-       (buffer-swap-text clean)
-       (unwind-protect (save-selected-window-excursion (funcall func clean))
-         (buffer-swap-text clean)
-         (kill-buffer clean))))))
+       (buffer-swap-text slim)
+       (unwind-protect (save-selected-window-excursion (funcall func slim))
+         (buffer-swap-text slim)
+         (kill-buffer slim))))))
 
-(cl-defun aoc-compile-with-clean (func &rest keys &allow-other-keys)
+(cl-defun aoc-compile-with-slim (func &rest keys &allow-other-keys)
   (emacs-lisp--before-compile-buffer)
-  (apply #'aoc-call-with-clean
+  (apply #'aoc-call-with-slim
          (lambda (original)
-           ;; Write out the clean version to disk so that file compilation
+           ;; Write out the slim version to disk so that file compilation
            ;; functions get the real thing.
            (save-buffer)
            ;; NOTE: Temporarily swap with the original to avoid the user seeing
-           ;; the temporary clean version as a result of whatever FUNC might
+           ;; the temporary slim version as a result of whatever FUNC might
            ;; decide to do (e.g. `emacs-lisp-native-compile-and-load' displays
            ;; its compilation buffer which can trigger a redisplay of our
            ;; buffer). Don't write anything to disk though, and pretend there
@@ -178,7 +178,7 @@
              (buffer-swap-text original))
            (unwind-protect (funcall func original)
              ;; NOTE: Once done, write out the original version to disk and undo
-             ;; the swap for `aoc-call-with-clean'. We set the buffer modified
+             ;; the swap for `aoc-call-with-slim'. We set the buffer modified
              ;; flag in order to force `save-buffer' to save.
              (with-silent-modifications
                (set-buffer-modified-p t)
@@ -188,16 +188,16 @@
 
 (defun aoc-load ()
   (interactive)
-  (aoc-call-with-clean (lambda (_) (eval-buffer)) :require nil :input nil))
+  (aoc-call-with-slim (lambda (_) (eval-buffer)) :require nil :input nil))
 
 (defun aoc-byte-compile-load ()
   (interactive)
-  (aoc-compile-with-clean
+  (aoc-compile-with-slim
    (lambda (_) (emacs-lisp-byte-compile-and-load)) :require nil :input nil))
 
 (defun aoc-native-compile-load ()
   (interactive)
-  (aoc-compile-with-clean
+  (aoc-compile-with-slim
    (lambda (_) (emacs-lisp-native-compile-and-load)) :require nil :input nil))
 
 ;;; AOC Run
@@ -243,9 +243,9 @@
         (goto-char (point-max))
         (insert marker)))))
 
-(defun aoc-copy (buffer &optional clean-comments)
-  (interactive (list (current-buffer) current-prefix-arg))
-  (with-current-buffer (aoc-clean-buffer buffer :comments clean-comments)
+(cl-defun aoc-copy (buffer &optional (comments t))
+  (interactive (list (current-buffer) (not current-prefix-arg)))
+  (with-current-buffer (aoc-slim-buffer buffer :comments (not comments))
     (let* ((name (symbol-name major-mode))
            (lang (and (string-match (rx (*? nonl) (group (+ (not "-"))) "-mode")
                                     name)
@@ -276,7 +276,7 @@
         (beginning-of-line)
         (insert
          (format "\n- [[#file-day-%02d-el][Day %02d]] \
-([[#file-day-%02d-clean-el][clean]])"
+([[#file-day-%02d-slim-el][slim]])"
                  day day day))))))
 
 ;;; AOC Mode
