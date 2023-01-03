@@ -4,9 +4,11 @@
 (require 'color)
 (require 'dash)
 (require 'elp)
+(require 'ht)
 (require 'mmt)
 (require 'pcase)
 (require 'queue)
+(require 's)
 (require 'seq)
 
 ;;; Strings and Symbols

@@ -1,6 +1,15 @@
 #!/usr/bin/env -S emacs --script
 ;; -*- mode: emacs-lisp; lexical-binding: t; -*-
 
+(require 'cl-lib)
+
+(dolist (dir (cl-remove-if-not
+              #'file-directory-p
+              (directory-files
+               (expand-file-name "~/.emacs.d/elpa/28.2/develop")
+               'full)))
+  (add-to-list 'load-path dir))
+
 (add-to-list
  'load-path
  (file-name-directory
@@ -13,25 +22,14 @@
    (t
     (buffer-file-name)))))
 
-(require 'cl-lib)
-
-;; HACK: We want to load `aoc-emacs' to get `aoc-clean-buffer', but the file
-;; pulls in various 3rd party libraries that are tedious to add to the load path
-;; when using Emacs in script mode. Instead, let's just mock them and patch any
-;; functions that cause loading to fail but are not necessary for
-;; `aoc-clean-buffer'.
-(dolist (lib '(aoc-util dash f mmt queue s transient))
-  (provide lib))
-(defmacro transient-define-prefix (&rest _))
 (require 'aoc-emacs)
 
 (when (< (length argv) 1)
-  (error "Usage: %s <file>" load-file-name))
+  (error "Usage: %s <file>+" load-file-name))
 
-(setq make-backup-files nil)
-
-(let ((filename (car argv))
-      (inhibit-message t))
-  (with-current-buffer (aoc-clean-buffer (find-file-existing filename))
-    (write-file (expand-file-name
-                 (concat (file-name-base filename) "-clean.el")))))
+(dolist (filename argv)
+  (let ((inhibit-message t)
+        (make-backup-files nil))
+    (with-current-buffer (aoc-clean-buffer (find-file-existing filename))
+      (write-file (expand-file-name
+                   (concat (file-name-base filename) "-clean.el"))))))
