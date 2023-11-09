@@ -49,5 +49,5 @@
   (monkey-business monkeys (-cut / <> 3) 20))
 
 (defun solve-11-2 (monkeys)
-  (let ((modulo (-product (for ((m monkeys)) (h. m :div)))))
+  (let ((modulo (cl-lcm (for ((m monkeys)) (h. m :div)))))
     (monkey-business monkeys (-cut mod <> modulo) 10000)))

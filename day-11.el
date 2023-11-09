@@ -6,9 +6,23 @@
 (require 'ht)
 (require 's)
 
-;;; For part 2 we assume all of the divisors will always be coprime (relatively
-;;; prime), so that we can apply the Chinese Remainder Theorem and reduce all of
-;;; the worry levels modulo the product of the divisors.
+;;; For part 2 we reduce each item's worry level modulo the least common
+;;; multiple (LCM) of the monkeys' divisors, which is enough to keep the numbers
+;;; from growing too large, yet still retains enough information to perform the
+;;; divisbility tests.
+;;;
+;;; Recall the definition of modulo:
+;;;
+;;; x mod n = x - k n
+;;;
+;;; Let m_i be the divisor for the i-th monkey, and let M = lcm(m_1, ..., m_n).
+;;; By definition of LCM, M is divisible by any of m_i. Now, for any worry level
+;;; x, its residue modulo m_i is preserved after reduction modulo M:
+;;;
+;;; (x mod M) mod m_i =
+;;; (x - k_1 M) mod m_i =
+;;; (x - k_1 k_2 m_i) mod m_i =
+;;; x mod m_i
 
 (defvar *monkey-regexp*
   (rx "Monkey " (group (+ digit)) ":
@@ -95,7 +109,7 @@ Monkey 3:
 (expect (solve-11-1 *input-11*) 55944)
 
 (defun solve-11-2 (monkeys)
-  (let ((modulo (-product (for ((m monkeys)) (h. m :div)))))
+  (let ((modulo (cl-lcm (for ((m monkeys)) (h. m :div)))))
     (monkey-business monkeys (-cut mod <> modulo) 10000)))
 
 (expect (solve-11-2 *test-11*) 2713310158)
