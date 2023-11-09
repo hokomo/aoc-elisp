@@ -8,12 +8,17 @@
 
 ;;; For both parts, we use a dynamic programming approach with memoization. Our
 ;;; state consists of the remaining time, the current valve position, and the
-;;; set of all still-closed non-zero-flow valves. At every step, we branch into
+;;; set of all still-closed non-zero-flow valves. At every step, we branch by
 ;;; trying to open each of the valves in our set recursively and take the
 ;;; maximum of their solutions.
 ;;;
-;;; For part 2 specifically, we encode the sets as bitsets in order to lower the
-;;; memory consumption.
+;;; For part 2, we encode the sets as bitsets in order to lower the memory
+;;; consumption. Because the elephant's behavior is in parallel to ours, we can
+;;; split the problem into two parts and solve them independently, with the same
+;;; approach as in part 1. We split the set of valves into those to be explored
+;;; by us versus the elephant. The optimal split is found by iterating through
+;;; all possible splits, which is easy to do due to the bitset representation
+;;; (iterating through [0, 2^n]).
 
 (defvar *valve-regexp*
   (rx-let ((valve (+ (any "A-Z"))))
