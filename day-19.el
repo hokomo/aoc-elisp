@@ -15,8 +15,8 @@
 ;;;
 ;;; We employ 3 optimizations, roughly from least to most important:
 ;;;
-;;; - At every step, we branch into trying to build each type of robot next. We
-;;;   do this by calculating the amount of time we might have to wait first in
+;;; - At every step, we branch by trying to build each type of robot next. We do
+;;;   this by calculating the amount of time we might have to wait first in
 ;;;   order to accumulate enough resources to build the robot. This allows us to
 ;;;   skip over multiple time units at a time and do away with a "do nothing"
 ;;;   action that we would need if we were to branch 1 time unit at a time.
