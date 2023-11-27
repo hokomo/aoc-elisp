@@ -9,11 +9,24 @@
 ;;; addition directly in balanced quinary, we convert to and from decimal, just
 ;;; for fun.
 ;;;
-;;; For an n-balanced quinary system, conversion from decimal is done by first
-;;; converting to a standard base n system, and then "carrying forward" the
-;;; digits.
+;;; One way of converting from decimal to an n-balanced numeral system is by
+;;; first converting to a standard base n system, and then "carrying forward"
+;;; the digits.
 ;;;
 ;;; See https://www.ias.ac.in/article/fulltext/reso/023/12/1395-1410.
+;;;
+;;; Another way is by performing the standard division algorithm but with
+;;; adjusted definitions of quotient and modulo. Instead of using the
+;;; conventional "common modulus", we use the "minimal modulus", which directly
+;;; gives us the digits. The minimal modulus can be found as a "modulo with
+;;; offset" with offset -n/2 (truncated).
+;;;
+;;; See:
+;;;
+;;; - https://oeis.org/wiki/Balanced_quinary_numeral_system
+;;; - https://mathworld.wolfram.com/MinimalResidue.html
+;;; - https://reference.wolfram.com/language/ref/Mod.html
+;;; - https://en.wikipedia.org/wiki/Modulo#Modulo_with_offset
 
 (defun read-25 (string)
   (s-split "\n" string t))
@@ -43,20 +56,16 @@
               (c (- c ?0))))
           5))
 
-(defun balanced-carry-forward (digits base)
-  (cl-assert (oddp base))
-  (let* ((carry 0)
-         (balanced (for ((:let ((half (/ base 2))))
-                         (digit (reverse digits)))
-                     (let ((digit (+ digit carry)))
-                       (prog1 (if (< digit half)
-                                  digit
-                                (wrap (- half) half digit))
-                         (setf carry (int (> digit half))))))))
-    (nreverse (if (zerop carry) balanced (cons carry balanced)))))
+(defun divmod-d (a n d)
+  (let ((q (floor (- a d) n)))
+    (list q (- a (* n q)))))
 
 (defun balanced-digits (n base)
-  (balanced-carry-forward (digits n base) base))
+  (cl-loop for (q r) = (divmod-d n base (- (/ base 2)))
+           collect r into ds
+           do (setf n q)
+           until (zerop n)
+           finally (cl-return (nreverse ds))))
 
 (defun format-snafu (n)
   (cl-map 'string

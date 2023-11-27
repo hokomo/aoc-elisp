@@ -9,20 +9,16 @@
               (c (- c ?0))))
           5))
 
-(defun balanced-carry-forward (digits base)
-  (cl-assert (oddp base))
-  (let* ((carry 0)
-         (balanced (for ((:let ((half (/ base 2))))
-                         (digit (reverse digits)))
-                     (let ((digit (+ digit carry)))
-                       (prog1 (if (< digit half)
-                                  digit
-                                (wrap (- half) half digit))
-                         (setf carry (int (> digit half))))))))
-    (nreverse (if (zerop carry) balanced (cons carry balanced)))))
+(defun divmod-d (a n d)
+  (let ((q (floor (- a d) n)))
+    (list q (- a (* n q)))))
 
 (defun balanced-digits (n base)
-  (balanced-carry-forward (digits n base) base))
+  (cl-loop for (q r) = (divmod-d n base (- (/ base 2)))
+           collect r into ds
+           do (setf n q)
+           until (zerop n)
+           finally (cl-return (nreverse ds))))
 
 (defun format-snafu (n)
   (cl-map 'string
