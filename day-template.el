@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (when (require 'aoc-emacs nil t) (aoc-mode 1)); -*-
+;; -*- lexical-binding: t; -*-
 
 (require 'aoc-util)
 (require 'cl-lib)
@@ -8,22 +8,22 @@
 (require 'queue)
 (require 's)
 
-(defun read-<level> (string)
+(defun read-<day> (string)
   )
 
-(definput *test-<level>* #'read-<level>
+(definput *test-<day>* #'read-<day>
   "")
 
-(definput *input-<level>* #'read-<level> "input-<level>.txt")
+(definput *input-<day>* #'read-<day> "input-<day>.txt")
 
-(defun solve-<level>-1 (thing)
+(defun solve-<day>-1 (thing)
   )
 
-(expect (solve-<level>-1 *test-<level>*) nil)
-(expect (solve-<level>-1 *input-<level>*) nil)
+(expect (solve-<day>-1 *test-<day>*) nil)
+(expect (solve-<day>-1 *input-<day>*) nil)
 
-(defun solve-<level>-2 (thing)
+(defun solve-<day>-2 (thing)
   )
 
-(expect (solve-<level>-2 *test-<level>*) nil)
-(expect (solve-<level>-2 *input-<level>*) nil)
+(expect (solve-<day>-2 *test-<day>*) nil)
+(expect (solve-<day>-2 *input-<day>*) nil)

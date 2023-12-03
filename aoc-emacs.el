@@ -35,17 +35,48 @@
 
 ;;; AOC Fetch
 
-(defvar aoc-root
-  (expand-file-name "~/Desktop/sync/aoc-2022/"))
+(defcustom aoc-root nil
+  "Path to a directory that acts as the working directory for
+various `aoc' functionality. If nil, `default-directory' is used
+instead."
+  :group 'aoc
+  :type 'directory)
+
+(defcustom aoc-session nil
+  "The session token to use when contacting Advent of Code. If nil,
+the token is instead read from the file at `<aoc-root>/.session',
+if it exists."
+  :group 'aoc
+  :type 'string)
+
+(defcustom aoc-year nil
+  "The Advent of Code edition to default to when using various `aoc'
+functionality. If nil, the current year is used instead."
+  :group 'aoc
+  :type 'integer)
 
 (defun aoc-read-day ()
-  (string-to-number (read-string "Day: " (format-time-string "%-d"))))
+  (let* ((current (format-time-string "%-d"))
+         (day (string-to-number (read-string "Day: " current))))
+    (if (and (integerp day) (<= 1 day 25))
+        day
+      (user-error "Day must be an integer between 1 and 25"))))
 
-(defvar aoc-session nil)
+(defun aoc-read-year ()
+  (let* ((current (if aoc-year
+                      (number-to-string aoc-year)
+                    (format-time-string "%Y")))
+         (year (string-to-number (read-string "Year: " current))))
+    (if (and (integerp year) (>= year 2015))
+        year
+      (user-error "Year must be an integer larger than 2015"))))
 
-(defun aoc-session ()
-  (let ((session-file (expand-file-name ".session" aoc-root)))
-    (and (f-exists-p session-file) (s-trim (f-read-text session-file)))))
+(defun aoc-file (file)
+  (expand-file-name file aoc-root))
+
+(defun aoc-read-session (&optional file)
+  (let ((file (or file (aoc-file ".session"))))
+    (and (f-exists-p file) (s-trim (f-read-text file)))))
 
 (defun aoc-url (year day &optional kind)
   (let ((base (format "https://adventofcode.com/%d/day/%d" year day)))
@@ -55,21 +86,20 @@
       (:answer (concat base "/answer")))))
 
 (defun aoc-fetch (url)
-  (unless aoc-session
-    (error "Missing session cookie"))
-  (let ((url-request-extra-headers
-         `(("Cookie" . ,(format "session=%s" aoc-session)))))
-    (with-current-buffer (url-retrieve-synchronously url t)
-      (prog1 (current-buffer)
-        (goto-char (point-min))
-        ;; Get rid of the HTTP response headers.
-        (re-search-forward "\n\n")
-        (delete-region (point-min) (point))))))
+  (if-let ((aoc-session (or aoc-session (aoc-read-session))))
+      (let ((url-request-extra-headers
+             `(("Cookie" . ,(format "session=%s" aoc-session)))))
+        (with-current-buffer (url-retrieve-synchronously url t)
+          (prog1 (current-buffer)
+            (goto-char (point-min))
+            ;; Get rid of the HTTP response headers.
+            (re-search-forward "\n\n")
+            (delete-region (point-min) (point)))))
+    (user-error "Missing session token")))
 
 (defun aoc-fetch-input (year day)
-  (interactive (list (string-to-number (format-time-string "%Y"))
-                     (aoc-read-day)))
-  (let ((input-file (expand-file-name (format "input-%02d.txt" day) aoc-root)))
+  (interactive (list (aoc-read-year) (aoc-read-day)))
+  (let ((input-file (aoc-file (format "input-%02d.txt" day))))
     (prog1 input-file
       (if (file-exists-p input-file)
           (message "%s already exists" input-file)
@@ -79,25 +109,31 @@
 
 ;;; AOC New
 
-(cl-defun aoc-new (filename level &optional year day)
-  (interactive (let* ((day (aoc-read-day))
-                      (filename (expand-file-name (format "day-%02d.el" day)
-                                                  aoc-root)))
-                 (list filename (format "%02d" day)
-                       (string-to-number (format-time-string "%Y")) day)))
-  (find-file filename)
-  (unless (file-exists-p filename)
+(defcustom aoc-template nil
+  "Path to a file to use as the template when creating a solution
+file. Can be a path relative to `aoc-root' if `aoc-root' is
+non-nil."
+  :group 'aoc
+  :type 'file)
+
+(cl-defun aoc-new (file year day)
+  (interactive (let ((year (aoc-read-year))
+                     (day (aoc-read-day)))
+                 (list (aoc-file (format "day-%02d.el" day)) year day)))
+  (find-file file)
+  (unless (file-exists-p file)
     (save-excursion
-      (insert-file-contents (expand-file-name "day-template.el" aoc-root))
-      (goto-char (point-min))
-      (while (re-search-forward (rx "<level>") nil t)
-        (replace-match level)))
+      (let ((template (and aoc-template (aoc-file aoc-template))))
+        (when (file-exists-p template)
+          (insert-file-contents template)
+          (goto-char (point-min))
+          (while (re-search-forward (rx "<day>") nil t)
+            (replace-match (format "%02d" day))))))
     (normal-mode))
-  (when (y-or-n-p "Fetch input?")
-    (let ((aoc-session (or aoc-session (aoc-session))))
-      (display-buffer (find-file-noselect (aoc-fetch-input year day))
-                      '((display-buffer-reuse-window
-                         display-buffer-below-selected))))))
+  (when (and (called-interactively-p 'any) (y-or-n-p "Fetch input?"))
+    (display-buffer (find-file-noselect (aoc-fetch-input year day))
+                    '((display-buffer-reuse-window
+                       display-buffer-below-selected)))))
 
 ;;; AOC Loading
 
@@ -267,17 +303,16 @@
 
 (defun aoc-readme-insert (day)
   (interactive (list (aoc-read-day)))
-  (with-current-buffer (find-file-existing
-                        (expand-file-name "README.org" aoc-root))
+  (with-current-buffer (find-file-existing (aoc-file "README.org"))
     (save-excursion
       (goto-char (point-min))
-      (when (re-search-forward (rx "\n\n\n" bol "- ") nil t)
+      (when (re-search-forward (rx bol "- ") nil t)
         (previous-line)
         (beginning-of-line)
         (insert
-         (format "\n- [[#file-day-%02d-el][Day %02d]] \
-([[#file-day-%02d-slim-el][slim]])"
-                 day day day))))))
+         (format "\n- [[./day-%02d.el][Day %02d]] \
+([[./day-%02d-slim.el][slim]], [[./input-%02d.txt][input]])"
+                 day day day day))))))
 
 ;;; AOC Mode
 
@@ -437,10 +472,10 @@
 
 ;;; Graphviz
 
-(defun call-with-graphviz (func filename)
+(defun call-with-graphviz (func file)
   (require 'graphviz-dot-mode)
   (let ((original (current-buffer))
-        (buffer (find-file-noselect filename)))
+        (buffer (find-file-noselect file)))
     (prog1 buffer
       (with-buffer buffer
         (erase-buffer)
@@ -449,8 +484,8 @@
         (graphviz-dot-preview)
         (switch-to-buffer original)))))
 
-(defmacro with-graphviz (filename &rest body)
+(defmacro with-graphviz (file &rest body)
   (declare (indent 1))
-  `(call-with-graphviz (lambda () ,@body) ,filename))
+  `(call-with-graphviz (lambda () ,@body) ,file))
 
 (provide 'aoc-emacs)
