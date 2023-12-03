@@ -314,12 +314,32 @@ non-nil."
 ([[./day-%02d-slim.el][slim]], [[./input-%02d.txt][input]])"
                  day day day day))))))
 
+(defcustom aoc-save-slim-p nil
+  "Whether `aoc-mode' should add a local `after-save-hook' that
+automatically invokes `aoc-save-slim' on buffer save."
+  :group 'aoc
+  :type 'boolean)
+
+(defun aoc-save-slim (&optional buffer)
+  (interactive (list (current-buffer)))
+  (if buffer-file-name
+      (let* ((base (file-name-base buffer-file-name))
+             (file (expand-file-name (format "%s-slim.el" base)))
+             (slim (aoc-slim-buffer (or buffer (current-buffer)))))
+        (with-current-buffer (find-file-noselect file)
+          (buffer-swap-text slim)
+          (save-buffer)
+          (kill-buffer slim)))
+    (user-error "Buffer not visiting a file")))
+
 ;;; AOC Mode
 
 (define-minor-mode aoc-mode
   "Mode for Advent of Code"
   :lighter "AoC"
   :keymap (make-sparse-keymap)
+  (when aoc-save-slim-p
+    (add-hook 'after-save-hook #'aoc-save-slim nil t))
   (setq-local eval-expression-print-length 20
               eval-expression-print-level 10))
 
@@ -328,6 +348,7 @@ non-nil."
 (define-key aoc-mode-map (kbd "C-c C-n") #'aoc-native-compile-load)
 (define-key aoc-mode-map (kbd "C-c C-r") #'aoc-run)
 (define-key aoc-mode-map (kbd "C-c C-c") #'aoc-copy)
+(define-key aoc-mode-map (kbd "C-c C-s") #'aoc-save-slim)
 (define-key aoc-mode-map (kbd "C-c C-e") #'aoc-readme-insert)
 (define-key aoc-mode-map (kbd "C-c C-d") #'toggle-debug-on-error)
 
@@ -338,6 +359,7 @@ non-nil."
     "n" #'aoc-native-compile-load
     "r" #'aoc-run
     "C" #'aoc-copy
+    "s" #'aoc-save-slim
     "x" #'aoc-readme-insert
     "d" #'toggle-debug-on-error))
 

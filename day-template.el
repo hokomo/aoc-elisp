@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; aoc-save-slim-p: t; -*-
 
 (require 'aoc-util)
 (require 'cl-lib)
