@@ -1,40 +1,12 @@
-;; -*- eval: (add-to-list 'load-path (expand-file-name "")); eval: (when (require 'aoc-emacs nil t) (aoc-mode 1)); -*-
-
 * About
 
-🎁 🎄 [[https://adventofcode.com/2022][Advent of Code 2022]] 🎄 🎁
-
-[[https://cdn.discordapp.com/emojis/832967182136377384.png]]
+🎁 🎄 [[https://adventofcode.com/][Advent of Code]] in Emacs Lisp 🎄 🎁
 
 * Contents
 
-- [[#file-day-template-el][Day Template]]
-- [[#file-aoc-util-el][Utilities]]
-- [[#file-aoc-emacs-el][Emacs Integration]]
+- [[./day-template.el][Day Template]]
+- [[./aoc-util.el][Utilities]]
+- [[./aoc-emacs.el][Emacs Integration]]
 
 
-- [[#file-day-25-el][Day 25]] ([[#file-day-25-slim-el][slim]])
-- [[#file-day-24-el][Day 24]] ([[#file-day-24-slim-el][slim]])
-- [[#file-day-23-el][Day 23]] ([[#file-day-23-slim-el][slim]])
-- [[#file-day-22-el][Day 22]] ([[#file-day-22-slim-el][slim]])
-- [[#file-day-21-el][Day 21]] ([[#file-day-21-slim-el][slim]])
-- [[#file-day-20-el][Day 20]] ([[#file-day-20-slim-el][slim]])
-- [[#file-day-19-el][Day 19]] ([[#file-day-19-slim-el][slim]])
-- [[#file-day-18-el][Day 18]] ([[#file-day-18-slim-el][slim]])
-- [[#file-day-17-el][Day 17]] ([[#file-day-17-slim-el][slim]])
-- [[#file-day-16-el][Day 16]] ([[#file-day-16-slim-el][slim]])
-- [[#file-day-15-el][Day 15]] ([[#file-day-15-slim-el][slim]])
-- [[#file-day-14-el][Day 14]] ([[#file-day-14-slim-el][slim]])
-- [[#file-day-13-el][Day 13]] ([[#file-day-13-slim-el][slim]])
-- [[#file-day-12-el][Day 12]] ([[#file-day-12-slim-el][slim]])
-- [[#file-day-11-el][Day 11]] ([[#file-day-11-slim-el][slim]])
-- [[#file-day-10-el][Day 10]] ([[#file-day-10-slim-el][slim]])
-- [[#file-day-09-el][Day 09]] ([[#file-day-09-slim-el][slim]])
-- [[#file-day-08-el][Day 08]] ([[#file-day-08-slim-el][slim]])
-- [[#file-day-07-el][Day 07]] ([[#file-day-07-slim-el][slim]])
-- [[#file-day-06-el][Day 06]] ([[#file-day-06-slim-el][slim]])
-- [[#file-day-05-el][Day 05]] ([[#file-day-05-slim-el][slim]])
-- [[#file-day-04-el][Day 04]] ([[#file-day-04-slim-el][slim]])
-- [[#file-day-03-el][Day 03]] ([[#file-day-03-slim-el][slim]])
-- [[#file-day-02-el][Day 02]] ([[#file-day-02-slim-el][slim]])
-- [[#file-day-01-el][Day 01]] ([[#file-day-01-slim-el][slim]])
+- [[./2022/README.org][Advent of Code 2022]]

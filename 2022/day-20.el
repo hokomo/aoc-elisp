@@ -86,7 +86,7 @@
 
 (expect (solve-20-1 *test-20-1*) 3)
 (expect (solve-20-1 *test-20-2*) -118)
-;; NOTE: Figure out why this thing is so slow, even with the right data
+;; TODO: Figure out why this thing is so slow, even with the right data
 ;; structure.
 (expect (solve-20-1 *input-20*) 19070)
 

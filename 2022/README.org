@@ -1,0 +1,33 @@
+* About
+
+🎁 🎄 [[https://adventofcode.com/2022][Advent of Code 2022]] 🎄 🎁
+
+[[https://cdn.discordapp.com/emojis/832967182136377384.png]]
+
+* Contents
+
+- [[./day-25.el][Day 25]] ([[./day-25-slim.el][slim]])
+- [[./day-24.el][Day 24]] ([[./day-24-slim.el][slim]])
+- [[./day-23.el][Day 23]] ([[./day-23-slim.el][slim]])
+- [[./day-22.el][Day 22]] ([[./day-22-slim.el][slim]])
+- [[./day-21.el][Day 21]] ([[./day-21-slim.el][slim]])
+- [[./day-20.el][Day 20]] ([[./day-20-slim.el][slim]])
+- [[./day-19.el][Day 19]] ([[./day-19-slim.el][slim]])
+- [[./day-18.el][Day 18]] ([[./day-18-slim.el][slim]])
+- [[./day-17.el][Day 17]] ([[./day-17-slim.el][slim]])
+- [[./day-16.el][Day 16]] ([[./day-16-slim.el][slim]])
+- [[./day-15.el][Day 15]] ([[./day-15-slim.el][slim]])
+- [[./day-14.el][Day 14]] ([[./day-14-slim.el][slim]])
+- [[./day-13.el][Day 13]] ([[./day-13-slim.el][slim]])
+- [[./day-12.el][Day 12]] ([[./day-12-slim.el][slim]])
+- [[./day-11.el][Day 11]] ([[./day-11-slim.el][slim]])
+- [[./day-10.el][Day 10]] ([[./day-10-slim.el][slim]])
+- [[./day-09.el][Day 09]] ([[./day-09-slim.el][slim]])
+- [[./day-08.el][Day 08]] ([[./day-08-slim.el][slim]])
+- [[./day-07.el][Day 07]] ([[./day-07-slim.el][slim]])
+- [[./day-06.el][Day 06]] ([[./day-06-slim.el][slim]])
+- [[./day-05.el][Day 05]] ([[./day-05-slim.el][slim]])
+- [[./day-04.el][Day 04]] ([[./day-04-slim.el][slim]])
+- [[./day-03.el][Day 03]] ([[./day-03-slim.el][slim]])
+- [[./day-02.el][Day 02]] ([[./day-02-slim.el][slim]])
+- [[./day-01.el][Day 01]] ([[./day-01-slim.el][slim]])

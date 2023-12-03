@@ -43,6 +43,8 @@ abdefghi")
         (:when (and (v2< [-1 -1] n dims) (funcall reachf hill pos n))))
     n))
 
+;; TODO: Pull out BFS.
+
 (defun hill-steps (hill start reachf pred)
   (let ((start (hill-find hill start))
         (q (queue-create))
