@@ -10,3 +10,4 @@
 
 
 - [[./2022/README.org][Advent of Code 2022]]
+- [[./2023/README.org][Advent of Code 2023]]

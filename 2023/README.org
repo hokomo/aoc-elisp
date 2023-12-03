@@ -1,0 +1,10 @@
+* About
+
+🎁 🎄 [[https://adventofcode.com/2023][Advent of Code 2023]] 🎄 🎁
+
+[[https://cdn.discordapp.com/emojis/832967182136377384.png]]
+
+* Contents
+
+- [[./day-02.el][Day 02]] ([[./day-02-slim.el][slim]], [[./input-02.txt][input]])
+- [[./day-01.el][Day 01]] ([[./day-01-slim.el][slim]], [[./input-01.txt][input]])
