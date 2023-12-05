@@ -24,7 +24,7 @@
 33549
 35390")
 
-(definput *input-08* #'read-08 "input-08.txt")
+(definput *input-08* #'read-08 "day-08-input.txt")
 
 (defun copy-forest (forest)
   (vmap #'copy-sequence forest))

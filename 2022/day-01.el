@@ -26,7 +26,7 @@
 
 10000")
 
-(definput *input-01* #'read-01 "input-01.txt")
+(definput *input-01* #'read-01 "day-01-input.txt")
 
 (defun calorie-sum (n calories)
   (-sum (top-n n (-map #'-sum calories))))

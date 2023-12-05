@@ -11,7 +11,7 @@
 (definput *test-06* #'read-06
   "mjqjpqmgbljsphdztnvjfqwrcgsmlb")
 
-(definput *input-06* #'read-06 "input-06.txt")
+(definput *input-06* #'read-06 "day-06-input.txt")
 
 (defun find-n-different (n string)
   (cl-loop for w in (seq-windows n string)

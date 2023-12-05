@@ -22,7 +22,7 @@ xtwone3four
 zoneight234
 7pqrstsixteen")
 
-(definput *input-01* #'read-01 "input-01.txt")
+(definput *input-01* #'read-01 "day-01-input.txt")
 
 (defvar *digit-regexp*
   (rx-to-string

@@ -39,7 +39,7 @@ move 3 from 1 to 3
 move 2 from 2 to 1
 move 1 from 1 to 2")
 
-(definput *input-05* #'read-05 "input-05.txt")
+(definput *input-05* #'read-05 "day-05-input.txt")
 
 (defun copy-crates (crates)
   (vmap #'copy-list crates))

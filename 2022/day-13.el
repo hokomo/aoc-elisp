@@ -41,7 +41,7 @@
 [1,[2,[3,[4,[5,6,7]]]],8,9]
 [1,[2,[3,[4,[5,6,0]]]],8,9]")
 
-(definput *input-13* #'read-13 "input-13.txt")
+(definput *input-13* #'read-13 "day-13-input.txt")
 
 (defun packet-cmp (x y)
   (if (and (integerp x) (integerp y))

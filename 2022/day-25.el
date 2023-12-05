@@ -46,7 +46,7 @@
 1=
 122")
 
-(definput *input-25* #'read-25 "input-25.txt")
+(definput *input-25* #'read-25 "day-25-input.txt")
 
 (defun parse-snafu (string)
   (horner (for ((c string))

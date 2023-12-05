@@ -19,7 +19,7 @@
 #<^v^^>#
 ######.#")
 
-(definput *input-24* #'read-24 "input-24.txt")
+(definput *input-24* #'read-24 "day-24-input.txt")
 
 (defun blizzard-dir (c)
   (pcase-exhaustive c (?^ [-1 0]) (?v [1 0]) (?< [0 -1]) (?> [0 1])))

@@ -17,7 +17,7 @@
 (definput *test-17* #'read-17
   ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>")
 
-(definput *input-17* #'read-17 "input-17.txt")
+(definput *input-17* #'read-17 "day-17-input.txt")
 
 (defvar *chamber-width* 7)
 

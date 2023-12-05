@@ -108,7 +108,7 @@ if it exists."
 
 (defun aoc-fetch-input (year day)
   (interactive (list (aoc-read-year) (aoc-read-day)))
-  (let ((file (aoc-file (format "input-%02d.txt" day))))
+  (let ((file (aoc-file (format "day-%02d-input.txt" day))))
     (prog1 file
       (if (file-exists-p file)
           (message "%s already exists" file)
@@ -121,7 +121,7 @@ if it exists."
   (if buffer-file-name
       (let* ((name (file-name-nondirectory buffer-file-name))
              (day (s-match (rx bos "day-" (group (+ digit)) ".el" eos) name))
-             (file (aoc-file (format "input-%s.txt" (cadr day)))))
+             (file (aoc-file (format "day-%s-input.txt" (cadr day)))))
         (if (or (file-exists-p file)
                 (and (y-or-n-p "Input file doesn't exist; fetch?")
                      (aoc-fetch-input year day)))
@@ -334,7 +334,7 @@ non-nil."
         (beginning-of-line)
         (insert
          (format "\n- [[./day-%02d.el][Day %02d]] \
-([[./day-%02d-slim.el][slim]], [[./input-%02d.txt][input]])"
+([[./day-%02d-slim.el][slim]], [[./day-%02d-input.txt][input]])"
                  day day day day))))))
 
 ;;; Mode

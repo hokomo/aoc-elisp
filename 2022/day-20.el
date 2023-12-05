@@ -25,7 +25,7 @@
 111
 2")
 
-(definput *input-20* #'read-20 "input-20.txt")
+(definput *input-20* #'read-20 "day-20-input.txt")
 
 (cl-defstruct (ring-node
                (:constructor ring-node-create (value &optional prev next))

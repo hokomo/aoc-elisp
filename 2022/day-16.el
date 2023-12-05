@@ -45,7 +45,7 @@ Valve HH has flow rate=22; tunnel leads to valve GG
 Valve II has flow rate=0; tunnels lead to valves AA, JJ
 Valve JJ has flow rate=21; tunnel leads to valve II")
 
-(definput *input-16* #'read-16 "input-16.txt")
+(definput *input-16* #'read-16 "day-16-input.txt")
 
 (defun valve-distances (valves)
   (graph-floyd-warshall

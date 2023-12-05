@@ -20,7 +20,7 @@ accszExk
 acctuvwj
 abdefghi")
 
-(definput *input-12* #'read-12 "input-12.txt")
+(definput *input-12* #'read-12 "day-12-input.txt")
 
 (defun hill-find (hill c)
   (with-tensor (i j) hill

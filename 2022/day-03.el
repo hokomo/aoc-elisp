@@ -26,7 +26,7 @@ wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
 ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw")
 
-(definput *input-03* #'read-03 "input-03.txt")
+(definput *input-03* #'read-03 "day-03-input.txt")
 
 (defun/s find-shared ([x y])
   (car (seq-intersection x y)))

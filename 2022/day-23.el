@@ -29,7 +29,7 @@
 ##.#.##
 .#..#..")
 
-(definput *input-23* #'read-23 "input-23.txt")
+(definput *input-23* #'read-23 "day-23-input.txt")
 
 (defun elves-create (grid)
   (let ((elves (ht)))

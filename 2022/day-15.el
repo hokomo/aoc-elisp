@@ -42,7 +42,7 @@ Sensor at x=16, y=7: closest beacon is at x=15, y=3
 Sensor at x=14, y=3: closest beacon is at x=15, y=3
 Sensor at x=20, y=1: closest beacon is at x=15, y=3")
 
-(definput *input-15* #'read-15 "input-15.txt")
+(definput *input-15* #'read-15 "day-15-input.txt")
 
 (defun/s sensor-range ([sensor beacon] y)
   ;; NOTE:

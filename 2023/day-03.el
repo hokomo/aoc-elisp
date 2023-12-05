@@ -22,7 +22,7 @@
 ...$.*....
 .664.598..")
 
-(definput *input-03* #'read-03 "input-03.txt")
+(definput *input-03* #'read-03 "day-03-input.txt")
 
 (defun v2overlap-p (u1 u2 v1 v2)
   (with-vref

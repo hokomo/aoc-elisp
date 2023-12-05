@@ -22,7 +22,7 @@
 6-6,4-6
 2-6,4-8")
 
-(definput *input-04* #'read-04 "input-04.txt")
+(definput *input-04* #'read-04 "day-04-input.txt")
 
 (defun/s complete-overlap-p ([x y])
   ;; NOTE: Assume the ranges are sorted.

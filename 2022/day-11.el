@@ -74,7 +74,7 @@ Monkey 3:
     If true: throw to monkey 0
     If false: throw to monkey 1")
 
-(definput *input-11* #'read-11 "input-11.txt")
+(definput *input-11* #'read-11 "day-11-input.txt")
 
 (defun copy-monkeys (monkeys)
   (vmap #'ht-copy monkeys))

@@ -39,7 +39,7 @@ $ ls
 5626152 d.ext
 7214296 k")
 
-(definput *input-07* #'read-07 "input-07.txt")
+(definput *input-07* #'read-07 "day-07-input.txt")
 
 (defun reconstruct-tree (commands)
   ;; NOTE: tree ::= (dir <name> . <tree>*) | (file <name> <size>)

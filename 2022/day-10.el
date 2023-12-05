@@ -16,9 +16,9 @@
 addx 3
 addx -5")
 
-(definput *test-10-2* #'read-10 "test-10-2.txt")
+(definput *test-10-2* #'read-10 "day-10-test-2.txt")
 
-(definput *input-10* #'read-10 "input-10.txt")
+(definput *input-10* #'read-10 "day-10-input.txt")
 
 (defun simulate-cpu (func x instructions)
   (let ((cycle 0))

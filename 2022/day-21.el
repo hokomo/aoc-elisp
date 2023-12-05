@@ -33,7 +33,7 @@ lgvd: ljgn * ptdq
 drzm: hmdt - zczc
 hmdt: 32")
 
-(definput *input-21* #'read-21 "input-21.txt")
+(definput *input-21* #'read-21 "day-21-input.txt")
 
 (defun monkey-solve (monkeys root &optional unknown)
   (let ((invs (ht ('+ '-) ('- '+) ('* '/) ('/ '*))))

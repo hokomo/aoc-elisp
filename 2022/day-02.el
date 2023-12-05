@@ -21,7 +21,7 @@
 B X
 C Z")
 
-(definput *input-02* #'read-02 "input-02.txt")
+(definput *input-02* #'read-02 "day-02-input.txt")
 
 (defun rps-compare (x y)
   ;; NOTE: (- x y) is the signed distance between x and y. A positive/negative

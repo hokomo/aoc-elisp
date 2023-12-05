@@ -52,7 +52,7 @@
 
 10R5L5R10L4R5L5")
 
-(definput *input-22* #'read-22 "input-22.txt")
+(definput *input-22* #'read-22 "day-22-input.txt")
 
 (defun map-create (grid)
   (pcase-let ((`[,m ,n] (vdims grid))

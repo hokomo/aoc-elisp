@@ -35,7 +35,7 @@ D 10
 L 25
 U 20")
 
-(definput *input-09* #'read-09 "input-09.txt")
+(definput *input-09* #'read-09 "day-09-input.txt")
 
 (defvar *rope-dirs*
   (ht ('U [-1 0]) ('D [1 0]) ('L [0 -1]) ('R [0 1])))

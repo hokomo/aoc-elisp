@@ -21,7 +21,7 @@
   "498,4 -> 498,6 -> 496,6
 503,4 -> 502,4 -> 502,9 -> 494,9")
 
-(definput *input-14* #'read-14 "input-14.txt")
+(definput *input-14* #'read-14 "day-14-input.txt")
 
 (defun cave-create (segments)
   (let ((cave (st)))

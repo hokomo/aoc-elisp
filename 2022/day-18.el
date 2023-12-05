@@ -31,7 +31,7 @@
 2,1,5
 2,3,5")
 
-(definput *input-18* #'read-18 "input-18.txt")
+(definput *input-18* #'read-18 "day-18-input.txt")
 
 (defun droplet-surface (droplets droplet)
   (let ((count 0))

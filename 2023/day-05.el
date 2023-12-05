@@ -53,7 +53,7 @@ humidity-to-location map:
 60 56 37
 56 93 4")
 
-(definput *input-05* #'read-05 "input-05.txt")
+(definput *input-05* #'read-05 "day-05-input.txt")
 
 (defun search-category-range (range category)
   ;;; NOTE: Assume the category's ranges are sorted by the source (`src') value.

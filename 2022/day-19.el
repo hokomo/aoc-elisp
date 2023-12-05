@@ -72,7 +72,7 @@ Each clay robot costs 3 ore. \
 Each obsidian robot costs 3 ore and 8 clay. \
 Each geode robot costs 3 ore and 12 obsidian.")
 
-(definput *input-19* #'read-19 "input-19.txt")
+(definput *input-19* #'read-19 "day-19-input.txt")
 
 (defun robot-wait (inv rates cost)
   (let ((waits (vmap (lambda (i r c)
