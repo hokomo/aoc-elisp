@@ -345,6 +345,7 @@ automatically invokes `aoc-save-slim' on buffer save."
   (setq-local eval-expression-print-length 20
               eval-expression-print-level 10))
 
+(define-key aoc-mode-map (kbd "C-c C-a") #'aoc-new)
 (define-key aoc-mode-map (kbd "C-c C-l") #'aoc-load)
 (define-key aoc-mode-map (kbd "C-c C-b") #'aoc-byte-compile-load)
 (define-key aoc-mode-map (kbd "C-c C-n") #'aoc-native-compile-load)
@@ -356,6 +357,7 @@ automatically invokes `aoc-save-slim' on buffer save."
 
 (with-eval-after-load 'core-spacemacs
   (spacemacs/set-leader-keys-for-minor-mode 'aoc-mode
+    "a" #'aoc-new
     "l" #'aoc-load
     "b" #'aoc-byte-compile-load
     "n" #'aoc-native-compile-load
