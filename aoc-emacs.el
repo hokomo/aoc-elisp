@@ -203,6 +203,18 @@ non-nil."
           (delete-trailing-whitespace))
         (funcall (buffer-local-value 'major-mode buffer))))))
 
+(defun aoc-save-slim (&optional buffer)
+  (interactive (list (current-buffer)))
+  (if buffer-file-name
+      (let* ((base (file-name-base buffer-file-name))
+             (file (expand-file-name (format "%s-slim.el" base)))
+             (slim (aoc-slim-buffer (or buffer (current-buffer)))))
+        (with-current-buffer (find-file-noselect file)
+          (buffer-swap-text slim)
+          (save-buffer)
+          (kill-buffer slim)))
+    (user-error "Buffer not visiting a file")))
+
 (cl-defun aoc-call-with-slim (func &rest keys &allow-other-keys)
   (let* ((buffer (current-buffer))
          (slim (apply #'aoc-slim-buffer buffer keys)))
@@ -340,31 +352,25 @@ non-nil."
 ;;; Mode
 
 (defcustom aoc-save-slim-p nil
-  "Whether `aoc-mode' should add a local `after-save-hook' that
-automatically invokes `aoc-save-slim' on buffer save."
+  "If non-nil, `aoc-save-slim' is automatically called on every
+buffer save when `aoc-mode' is enabled."
   :group 'aoc
   :type 'boolean)
 
-(defun aoc-save-slim (&optional buffer)
-  (interactive (list (current-buffer)))
-  (if buffer-file-name
-      (let* ((base (file-name-base buffer-file-name))
-             (file (expand-file-name (format "%s-slim.el" base)))
-             (slim (aoc-slim-buffer (or buffer (current-buffer)))))
-        (with-current-buffer (find-file-noselect file)
-          (buffer-swap-text slim)
-          (save-buffer)
-          (kill-buffer slim)))
-    (user-error "Buffer not visiting a file")))
+(defun aoc-after-save-hook ()
+  (when aoc-save-slim-p
+    (aoc-save-slim)))
 
 (define-minor-mode aoc-mode
   "Mode for Advent of Code"
   :lighter "AoC"
   :keymap (make-sparse-keymap)
-  (when aoc-save-slim-p
-    (add-hook 'after-save-hook #'aoc-save-slim nil t))
-  (setq-local eval-expression-print-length 20
-              eval-expression-print-level 10))
+  (if aoc-mode
+      (progn
+        (add-hook 'after-save-hook #'aoc-after-save-hook nil t)
+        (setq-local eval-expression-print-length 20
+                    eval-expression-print-level 10))
+    (remove-hook 'after-save-hook #'aoc-after-save-hook t)))
 
 (define-key aoc-mode-map (kbd "C-c C-a") #'aoc-new)
 (define-key aoc-mode-map (kbd "C-c C-i") #'aoc-display-input)
