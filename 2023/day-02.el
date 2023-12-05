@@ -16,12 +16,11 @@
   (rx (group (+ digit)) " " (group (eval `(| ,@*cube-colors*)))))
 
 (defun parse-round (string)
-  (cl-loop
-    with counts = (ht)
-    for cube in (s-split ", " string t)
-    for (n color) = (cdr (s-match *cube-regexp* cube))
-    do (setf (h. counts color) (int n))
-    finally (cl-return `[,@(--map (or (h. counts it) 0) *cube-colors*)])))
+  (let ((counts (ht)))
+    (pfor-do ((cube (s-split ", " string t))
+              (:let (((n color) (cdr (s-match *cube-regexp* cube))))))
+      (setf (h. counts color) (int n)))
+    `[,@(--map (or (h. counts it) 0) *cube-colors*)]))
 
 (defun parse-game (line)
   (seq-let [id body] (cdr (s-match *game-regexp* line))
