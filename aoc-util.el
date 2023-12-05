@@ -667,7 +667,8 @@
   (declare (indent 2))
   (mmt-with-gensyms (cur)
     (let* ((dims (mmt-make-gensym-list (length specs)))
-           (axes (-zip (-sort (-on #'string< #'with-tensor--name) specs) dims)))
+           (axes (-zip-pair (-sort (-on #'string< #'with-tensor--name) specs)
+                            dims)))
       `(let* ((,cur ,tensor)
               ,@(cl-loop for i from 0
                          for d in dims
