@@ -253,7 +253,7 @@ non-nil."
           (cond
            ((equal arg '(4))
             (setf n 1))
-           ((minusp n)
+           ((cl-minusp n)
             (setf n (abs n)
                   arg '(4)))
            (t

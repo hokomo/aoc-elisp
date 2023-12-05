@@ -46,7 +46,7 @@
   (with-sref ring-node
     (cl-loop with cur = node
              repeat (abs n)
-             do (setf cur (if (minusp n) cur.prev cur.next))
+             do (setf cur (if (cl-minusp n) cur.prev cur.next))
              finally (cl-return cur))))
 
 (defun ring-mix-number (ring i)
