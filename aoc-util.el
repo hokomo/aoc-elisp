@@ -232,6 +232,9 @@
                       x)))
          seq keys))
 
+(defun listify (seq)
+  (cl-coerce seq 'list))
+
 ;;; Comparison
 
 (defun compare-by (pred key)
