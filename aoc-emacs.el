@@ -117,9 +117,11 @@ non-nil."
   :type 'file)
 
 (cl-defun aoc-new (file year day)
-  (interactive (let ((year (aoc-read-year))
-                     (day (aoc-read-day)))
-                 (list (aoc-file (format "day-%02d.el" day)) year day)))
+  (interactive (if (or aoc-root (y-or-n-p "AoC root unset; proceed?"))
+                   (let ((year (aoc-read-year))
+                         (day (aoc-read-day)))
+                     (list (aoc-file (format "day-%02d.el" day)) year day))
+                 (keyboard-quit)))
   (find-file file)
   (unless (file-exists-p file)
     (save-excursion
