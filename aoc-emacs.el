@@ -33,7 +33,7 @@
     (goto-char (match-beginning 0))
     (delete-sexp)))
 
-;;; AOC Fetch
+;;; Fetch
 
 (defcustom aoc-root nil
   "Path to a directory that acts as the working directory for
@@ -107,7 +107,7 @@ functionality. If nil, the current year is used instead."
           (write-file input-file))
         (message "Input saved to %s" input-file)))))
 
-;;; AOC New
+;;; New
 
 (defcustom aoc-template nil
   "Path to a file to use as the template when creating a solution
@@ -135,7 +135,7 @@ non-nil."
                     '((display-buffer-reuse-window
                        display-buffer-below-selected)))))
 
-;;; AOC Loading
+;;; Loading
 
 (cl-defun aoc-slim-buffer (buffer &key (require t) (input t) (output t)
                                     (dev t) (comments t))
@@ -236,7 +236,7 @@ non-nil."
   (aoc-compile-with-slim
    (lambda (_) (emacs-lisp-native-compile-and-load)) :require nil :input nil))
 
-;;; AOC Run
+;;; Run
 
 (defun aoc-run (&optional n)
   (interactive "p")
@@ -263,7 +263,7 @@ non-nil."
                    finally (let ((current-prefix-arg arg))
                              (call-interactively #'eval-defun))))))))
 
-;;; AOC Copy
+;;; Copy
 
 (defun aoc-wrap-buffer (beg end type &optional lang)
   (let* ((marker (cl-ecase type
@@ -299,7 +299,7 @@ non-nil."
       (use-local-map map))
     (switch-to-buffer (current-buffer))))
 
-;;; AOC Readme
+;;; Readme
 
 (defun aoc-readme-insert (day)
   (interactive (list (aoc-read-day)))
@@ -332,7 +332,7 @@ automatically invokes `aoc-save-slim' on buffer save."
           (kill-buffer slim)))
     (user-error "Buffer not visiting a file")))
 
-;;; AOC Mode
+;;; Mode
 
 (define-minor-mode aoc-mode
   "Mode for Advent of Code"
