@@ -99,13 +99,28 @@ functionality. If nil, the current year is used instead."
 
 (defun aoc-fetch-input (year day)
   (interactive (list (aoc-read-year) (aoc-read-day)))
-  (let ((input-file (aoc-file (format "input-%02d.txt" day))))
-    (prog1 input-file
-      (if (file-exists-p input-file)
-          (message "%s already exists" input-file)
+  (let ((file (aoc-file (format "input-%02d.txt" day))))
+    (prog1 file
+      (if (file-exists-p file)
+          (message "%s already exists" file)
         (with-current-buffer (aoc-fetch (aoc-url year day :input))
-          (write-file input-file))
-        (message "Input saved to %s" input-file)))))
+          (write-file file))
+        (message "Input saved to %s" file)))))
+
+(defun aoc-display-input ()
+  (interactive)
+  (if buffer-file-name
+      (let* ((name (file-name-nondirectory buffer-file-name))
+             (day (s-match (rx bos "day-" (group (+ digit)) ".el" eos) name))
+             (file (aoc-file (format "input-%s.txt" (cadr day)))))
+        (if (or (file-exists-p file)
+                (and (y-or-n-p "Input file doesn't exist; fetch?")
+                     (aoc-fetch-input year day)))
+            (display-buffer (find-file-noselect file)
+                            '((display-buffer-reuse-window
+                               display-buffer-in-previous-window
+                               display-buffer-pop-up-window)))))
+    (user-error "Buffer not visiting a file")))
 
 ;;; New
 
@@ -346,6 +361,7 @@ automatically invokes `aoc-save-slim' on buffer save."
               eval-expression-print-level 10))
 
 (define-key aoc-mode-map (kbd "C-c C-a") #'aoc-new)
+(define-key aoc-mode-map (kbd "C-c C-i") #'aoc-display-input)
 (define-key aoc-mode-map (kbd "C-c C-l") #'aoc-load)
 (define-key aoc-mode-map (kbd "C-c C-b") #'aoc-byte-compile-load)
 (define-key aoc-mode-map (kbd "C-c C-n") #'aoc-native-compile-load)
@@ -358,6 +374,7 @@ automatically invokes `aoc-save-slim' on buffer save."
 (with-eval-after-load 'core-spacemacs
   (spacemacs/set-leader-keys-for-minor-mode 'aoc-mode
     "a" #'aoc-new
+    "i" #'aoc-display-input
     "l" #'aoc-load
     "b" #'aoc-byte-compile-load
     "n" #'aoc-native-compile-load
