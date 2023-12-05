@@ -33,7 +33,7 @@
     (goto-char (match-beginning 0))
     (delete-sexp)))
 
-;;; Fetch
+;;; General
 
 (defcustom aoc-root nil
   "Path to a directory that acts as the working directory for
@@ -42,18 +42,14 @@ instead."
   :group 'aoc
   :type 'directory)
 
-(defcustom aoc-session nil
-  "The session token to use when contacting Advent of Code. If nil,
-the token is instead read from the file at `<aoc-root>/.session',
-if it exists."
-  :group 'aoc
-  :type 'string)
-
 (defcustom aoc-year nil
   "The Advent of Code edition to default to when using various `aoc'
 functionality. If nil, the current year is used instead."
   :group 'aoc
   :type 'integer)
+
+(defun aoc-file (file)
+  (expand-file-name file aoc-root))
 
 (defun aoc-read-day ()
   (let* ((current (format-time-string "%-d"))
@@ -71,8 +67,19 @@ functionality. If nil, the current year is used instead."
         year
       (user-error "Year must be an integer larger than 2015"))))
 
-(defun aoc-file (file)
-  (expand-file-name file aoc-root))
+(defun aoc-display-buffer (buffer)
+  (display-buffer buffer '((display-buffer-reuse-window
+                            display-buffer-in-previous-window
+                            display-buffer-pop-up-window))))
+
+;;; Fetch
+
+(defcustom aoc-session nil
+  "The session token to use when contacting Advent of Code. If nil,
+the token is instead read from the file at `<aoc-root>/.session',
+if it exists."
+  :group 'aoc
+  :type 'string)
 
 (defun aoc-read-session (&optional file)
   (let ((file (or file (aoc-file ".session"))))
@@ -97,6 +104,8 @@ functionality. If nil, the current year is used instead."
             (delete-region (point-min) (point)))))
     (user-error "Missing session token")))
 
+;;; Input
+
 (defun aoc-fetch-input (year day)
   (interactive (list (aoc-read-year) (aoc-read-day)))
   (let ((file (aoc-file (format "input-%02d.txt" day))))
@@ -116,10 +125,7 @@ functionality. If nil, the current year is used instead."
         (if (or (file-exists-p file)
                 (and (y-or-n-p "Input file doesn't exist; fetch?")
                      (aoc-fetch-input year day)))
-            (display-buffer (find-file-noselect file)
-                            '((display-buffer-reuse-window
-                               display-buffer-in-previous-window
-                               display-buffer-pop-up-window)))))
+            (aoc-display-buffer (find-file-noselect file))))
     (user-error "Buffer not visiting a file")))
 
 ;;; New
@@ -148,11 +154,9 @@ non-nil."
             (replace-match (format "%02d" day))))))
     (normal-mode))
   (when (and (called-interactively-p 'any) (y-or-n-p "Fetch input?"))
-    (display-buffer (find-file-noselect (aoc-fetch-input year day))
-                    '((display-buffer-reuse-window
-                       display-buffer-below-selected)))))
+    (aoc-display-buffer (find-file-noselect (aoc-fetch-input year day)))))
 
-;;; Loading
+;;; Slim
 
 (cl-defun aoc-slim-buffer (buffer &key (require t) (input t) (output t)
                                     (dev t) (comments t))
@@ -212,6 +216,8 @@ non-nil."
        (unwind-protect (save-selected-window-excursion (funcall func slim))
          (buffer-swap-text slim)
          (kill-buffer slim))))))
+
+;;; Load and Compile
 
 (cl-defun aoc-compile-with-slim (func &rest keys &allow-other-keys)
   (emacs-lisp--before-compile-buffer)
@@ -331,6 +337,8 @@ non-nil."
 ([[./day-%02d-slim.el][slim]], [[./input-%02d.txt][input]])"
                  day day day day))))))
 
+;;; Mode
+
 (defcustom aoc-save-slim-p nil
   "Whether `aoc-mode' should add a local `after-save-hook' that
 automatically invokes `aoc-save-slim' on buffer save."
@@ -348,8 +356,6 @@ automatically invokes `aoc-save-slim' on buffer save."
           (save-buffer)
           (kill-buffer slim)))
     (user-error "Buffer not visiting a file")))
-
-;;; Mode
 
 (define-minor-mode aoc-mode
   "Mode for Advent of Code"
