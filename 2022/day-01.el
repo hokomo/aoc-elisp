@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; eval: (add-to-list 'load-path (expand-file-name "")); eval: (when (require 'aoc-emacs nil t) (aoc-mode 1)); -*-
+;; -*- lexical-binding: t; aoc-save-slim-p: t; -*-
 
 (require 'aoc-util)
 (require 'dash)
