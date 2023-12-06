@@ -10,7 +10,9 @@
                                  (aoc-read-session
                                   (expand-file-name ".session" dir))
                                  aoc-template
-                                 (expand-file-name "day-template.el" dir))
+                                 (expand-file-name "day-template.el" dir)
+                                 aoc-year 2023
+                                 aoc-root (expand-file-name "2023" dir))
                      (aoc-mode 1))))))
  ("2022" . ((nil . ((eval . (let ((dir (file-name-directory
                                         (locate-dominating-file
