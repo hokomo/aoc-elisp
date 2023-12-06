@@ -59,13 +59,12 @@ functionality. If nil, the current year is used instead."
       (user-error "Day must be an integer between 1 and 25"))))
 
 (defun aoc-read-year ()
-  (let* ((current (if aoc-year
-                      (number-to-string aoc-year)
-                    (format-time-string "%Y")))
-         (year (string-to-number (read-string "Year: " current))))
-    (if (and (integerp year) (>= year 2015))
-        year
-      (user-error "Year must be an integer larger than 2015"))))
+  (or aoc-year
+      (let* ((current (format-time-string "%Y"))
+             (year (string-to-number (read-string "Year: " current))))
+        (if (and (integerp year) (>= year 2015))
+            year
+          (user-error "Year must be an integer larger than 2015")))))
 
 (defun aoc-display-buffer (buffer)
   (display-buffer buffer '((display-buffer-reuse-window
