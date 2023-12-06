@@ -75,8 +75,8 @@ functionality. If nil, the current year is used instead."
 
 (defcustom aoc-session nil
   "The session token to use when contacting Advent of Code. If nil,
-the token is instead read from the file at `<aoc-root>/.session',
-if it exists."
+the token is instead read from the file named \".session\"
+relative to `aoc-root', if it exists."
   :group 'aoc
   :type 'string)
 
@@ -131,8 +131,7 @@ if it exists."
 
 (defcustom aoc-template nil
   "Path to a file to use as the template when creating a solution
-file. Can be a path relative to `aoc-root' if `aoc-root' is
-non-nil."
+file. Can be a path relative to `aoc-root'."
   :group 'aoc
   :type 'file)
 
