@@ -14,7 +14,7 @@
 (definput *test-<day>* #'read-<day>
   "")
 
-(definput *input-<day>* #'read-<day> "input-<day>.txt")
+(definput *input-<day>* #'read-<day> "day-<day>-input.txt")
 
 (defun solve-<day>-1 (thing)
   )

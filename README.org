@@ -4,7 +4,7 @@
 
 * Contents
 
-- [[./day-template.el][Day Template]]
+- [[./aoc-template.el][Solution Template]]
 - [[./aoc-util.el][Utilities]]
 - [[./aoc-emacs.el][Emacs Integration]]
 
