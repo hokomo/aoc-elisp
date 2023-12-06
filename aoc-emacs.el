@@ -69,7 +69,8 @@ functionality. If nil, the current year is used instead."
 (defun aoc-display-buffer (buffer)
   (display-buffer buffer '((display-buffer-reuse-window
                             display-buffer-in-previous-window
-                            display-buffer-pop-up-window))))
+                            display-buffer-pop-up-window)
+                           (inhibit-same-window t))))
 
 ;;; Fetch
 
@@ -119,12 +120,18 @@ relative to `aoc-root', if it exists."
   (interactive)
   (if buffer-file-name
       (let* ((name (file-name-nondirectory buffer-file-name))
-             (day (s-match (rx bos "day-" (group (+ digit)) ".el" eos) name))
-             (file (aoc-file (format "day-%s-input.txt" (cadr day)))))
-        (if (or (file-exists-p file)
-                (and (y-or-n-p "Input file doesn't exist; fetch?")
-                     (aoc-fetch-input year day)))
-            (aoc-display-buffer (find-file-noselect file))))
+             (day (or (-some->> name (s-match (rx bos "day-" (group (+ digit))))
+                                cl-second string-to-number)
+                      (user-error "Weird filename; cannot auto-detect day")))
+             (file (aoc-file (format "day-%02d-input.txt" day))))
+        (when (or (file-exists-p file)
+                  (and (y-or-n-p "Input file doesn't exist; fetch?")
+                       (aoc-fetch-input (aoc-read-year) day)))
+          (aoc-display-buffer (or (get-file-buffer file)
+                                  (with-current-buffer (find-file-noselect file)
+                                    (visual-line-mode -1)
+                                    (toggle-truncate-lines 1)
+                                    (current-buffer))))))
     (user-error "Buffer not visiting a file")))
 
 ;;; New
@@ -150,9 +157,10 @@ file. Can be a path relative to `aoc-root'."
           (goto-char (point-min))
           (while (re-search-forward (rx "<day>") nil t)
             (replace-match (format "%02d" day))))))
-    (normal-mode))
-  (when (and (called-interactively-p 'any) (y-or-n-p "Fetch input?"))
-    (aoc-display-buffer (find-file-noselect (aoc-fetch-input year day)))))
+    (normal-mode)
+    (save-buffer)
+    (when (called-interactively-p 'any)
+      (aoc-display-input))))
 
 ;;; Slim
 
