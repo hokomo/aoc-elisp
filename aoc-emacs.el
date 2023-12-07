@@ -265,17 +265,18 @@ file. Can be a path relative to `aoc-root'."
 
 (defun aoc-load ()
   (interactive)
-  (aoc-call-with-slim (lambda (_) (eval-buffer)) :require nil :input nil))
+  (aoc-call-with-slim (lambda (_) (eval-buffer))
+                      :require nil :input nil :comments nil))
 
 (defun aoc-byte-compile-load ()
   (interactive)
-  (aoc-compile-with-slim
-   (lambda (_) (emacs-lisp-byte-compile-and-load)) :require nil :input nil))
+  (aoc-compile-with-slim (lambda (_) (emacs-lisp-byte-compile-and-load))
+                         :require nil :input nil :comments nil))
 
 (defun aoc-native-compile-load ()
   (interactive)
-  (aoc-compile-with-slim
-   (lambda (_) (emacs-lisp-native-compile-and-load)) :require nil :input nil))
+  (aoc-compile-with-slim (lambda (_) (emacs-lisp-native-compile-and-load))
+                         :require nil :input nil :comments nil))
 
 ;;; Run
 
