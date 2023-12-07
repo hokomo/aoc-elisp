@@ -280,30 +280,31 @@ file. Can be a path relative to `aoc-root'."
 
 ;;; Run
 
-(defun aoc-run (&optional n)
-  (interactive "p")
-  (let ((regexp (rx (or "(expect" "(display"))))
-    (if (equal current-prefix-arg '(16))
-        (save-excursion
-          (goto-char (point-min))
-          (cl-loop while (re-search-forward regexp nil t)
-                   do (eval-defun nil)))
-      (let ((arg current-prefix-arg))
-        (when (called-interactively-p 'any)
-          (cond
-           ((equal arg '(4))
-            (setf n 1))
-           ((cl-minusp n)
-            (setf n (abs n)
-                  arg '(4)))
-           (t
-            (setf arg nil))))
-        (save-excursion
-          (goto-char (point-min))
-          (cl-loop repeat n
-                   always (re-search-forward regexp nil t)
-                   finally (let ((current-prefix-arg arg))
-                             (call-interactively #'eval-defun))))))))
+(defun aoc-run (&optional n debug)
+  "Evaluate any top-level `expect', `display', `with-profiling' and
+`with-sprofiling' forms in order.
+
+If N is nil, evaluate all such forms, otherwise only the first N.
+If DEBUG is non-nil, evaluate in debug mode.
+
+Interactively, evaluate all forms if at least one universal
+argument is given, otherwise only as many as the numeric value of
+the prefix argument (or 1 without a prefix argument). Evaluate in
+debug mode with two universal arguments or if the numeric value
+of the prefix argument is negative."
+  (interactive (let* ((arg current-prefix-arg)
+                      (val (prefix-numeric-value arg)))
+                 (list (if (consp arg) nil (abs val))
+                       (or (equal arg '(16)) (cl-minusp val)))))
+  (let ((regexp (rx bol "(" (or "expect" "display"
+                                (seq "with-" (? "s") "profiling")))))
+    (save-excursion
+      (goto-char (point-min))
+      (cl-loop for i from 1
+               while (or (not n) (<= i n))
+               always (re-search-forward regexp nil t)
+               when (or (not n) (= i n))
+                 do (eval-defun debug)))))
 
 ;;; Copy
 
