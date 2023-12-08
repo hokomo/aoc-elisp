@@ -333,7 +333,9 @@ of the prefix argument is negative."
     (let ((map (make-sparse-keymap))
           (copy (lambda ()
                   (interactive)
-                  (copy-region-as-kill (point-min) (point-max))
+                  ;; NOTE: Avoid appending to the last kill.
+                  (let ((last-command nil))
+                    (copy-region-as-kill (point-min) (point-max)))
                   (message "Code block copied to kill ring")
                   (kill-buffer))))
       (set-keymap-parent map (current-local-map))
