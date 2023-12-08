@@ -5,6 +5,7 @@
 (require 'dash)
 (require 'elp)
 (require 'ht)
+(require 'macroexp)
 (require 'mmt)
 (require 'pcase)
 (require 'queue)
@@ -75,31 +76,33 @@
 (defmacro comment (&rest _body)
   nil)
 
-(defmacro dmsg (&rest forms)
-  (and forms
-       (cl-destructuring-bind (head . rest) forms
-         (mmt-once-only ((h head))
-           `(prog1 ,h
-              ,(if (or (and (atom head) (not (symbolp head)))
-                       (and (consp head) (eq (car head) 'quote)))
-                   `(message "%s" ,h)
-                 `(message "%S: %S" ',head ,h))
-              ,@(cl-loop for form in rest
-                         collect (mmt-once-only ((f form))
-                                   (if (or (and (atom form) (not (symbolp form)))
-                                           (and (consp form) (eq (car form) 'quote)))
-                                       `(message "%s" ,f)
-                                     `(message "%S: %S" ',form ,f)))))))))
+(defun dprettyp (form)
+  (or (and (atom form) (not (symbolp form)))
+      (and (consp form) (eq (car form) 'quote))))
 
-(defmacro dprint (&rest forms)
-  (and forms
-       (cl-destructuring-bind (head . rest) forms
-         (mmt-once-only ((h head))
-           `(prog1 ,h
-              (printf "%S: %S" ',head ,h)
-              ,@(cl-loop for form in rest
-                         collect `(printf ", %S: %S" ',form ,form))
-              (princ "\n"))))))
+(defmacro dmsg (form &rest forms)
+  (cl-labels ((make-message (form &optional value)
+                (if (dprettyp form)
+                    `(message "%s" ,(or value form))
+                  `(message "%S: %S" ',form ,(or value form)))))
+    (mmt-once-only ((value form))
+      `(progn
+         ,(make-message form value)
+         ,@(mapcar #'make-message forms)
+         ,value))))
+
+(defmacro dprint (form &rest forms)
+  (cl-labels ((make-print (form &optional value)
+                (let ((sep (if value "" ", ")))
+                  (if (dprettyp form)
+                      `(printf "%s%s" ,sep ,(or value form))
+                    `(printf "%s%S: %S" ,sep ',form ,(or value form))))))
+    (mmt-once-only ((value form))
+      `(progn
+         ,(make-print form value)
+         ,@(mapcar #'make-print forms)
+         (princ "\n")
+         ,value))))
 
 (defmacro with-profiling (funcs &rest body)
   (declare (indent 1))
@@ -216,6 +219,7 @@
 
 (defun seq-type (seq)
   (cl-etypecase seq
+    ;; NOTE: Guard against `cons'.
     (list 'list)
     (t (type-of seq))))
 
@@ -242,6 +246,8 @@
                         (apply #'tree-reduce func x keys)
                       x)))
          seq keys))
+
+;;; Lists
 
 (defun listify (seq)
   (cl-coerce seq 'list))
