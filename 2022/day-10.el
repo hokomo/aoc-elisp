@@ -49,7 +49,7 @@ addx -5")
 (expect (solve-10-1 *input-10*) 16060)
 
 (defun solve-10-2 (instructions)
-  (with-buffer _
+  (with-buffer nil
     (simulate-cpu (lambda (cycle x)
                     ;; NOTE: The pixel indices are 0-based.
                     (princ (if (<= (1- x) (mod cycle 40) (1+ x)) "#" "."))

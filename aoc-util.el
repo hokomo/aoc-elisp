@@ -1014,11 +1014,21 @@
 
 ;;; Buffers
 
-(defmacro with-buffer (expr &rest body)
+(defmacro with-buffer (name &rest body)
+  "Create a new buffer with the name given by the expression NAME,
+make it current and redirect `standard-output' to it; then,
+evaluate BODY and return its result.
+
+If NAME is nil, a temporary buffer is generated as with
+`with-temp-buffer', except that it is not automatically killed.
+Otherwise, NAME should be a string.
+
+The buffers are always created with INHIBIT-BUFFER-HOOKS set to
+t. See `get-buffer-create' and `generate-new-buffer'."
   (declare (indent 1))
-  (mmt-once-only ((expr (if (member expr '(nil _)) nil expr)))
-    `(with-current-buffer (if ,expr
-                              (get-buffer-create ,expr t)
+  (macroexp-let2 nil name name
+    `(with-current-buffer (if ,name
+                              (get-buffer-create ,name t)
                             (generate-new-buffer " *temp*" t))
        (let ((standard-output (current-buffer)))
          ,@body))))

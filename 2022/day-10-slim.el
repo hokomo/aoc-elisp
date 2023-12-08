@@ -28,7 +28,7 @@
     sum))
 
 (defun solve-10-2 (instructions)
-  (with-buffer _
+  (with-buffer nil
     (simulate-cpu (lambda (cycle x)
                     (princ (if (<= (1- x) (mod cycle 40) (1+ x)) "#" "."))
                     (when (zerop (mod (1+ cycle) 40))
