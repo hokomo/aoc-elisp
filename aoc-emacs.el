@@ -14,13 +14,6 @@
           (kill-ring-yank-pointer kill-ring))
      ,@body))
 
-(defmacro save-selected-window-excursion (&rest body)
-  (mmt-with-gensyms (window state)
-    `(let* ((,window (selected-window))
-            (,state (window-state-get ,window)))
-       (unwind-protect (progn ,@body)
-         (window-state-put ,state ,window)))))
-
 (defun delete-sexp ()
   (save-kill-ring
    (kill-sexp)
@@ -222,61 +215,51 @@ file. Can be a path relative to `aoc-root'."
     (user-error "Buffer not visiting a file")))
 
 (cl-defun aoc-call-with-slim (func &rest keys &allow-other-keys)
-  (let* ((buffer (current-buffer))
-         (slim (apply #'aoc-slim-buffer buffer keys)))
-    (save-selected-window-excursion
-     (with-silent-modifications
-       ;; NOTE: Perform the operation on the slim version of the text but still
-       ;; within the original buffer, so that any location information is
-       ;; preserved. We silence modifications because swapping the buffer text
-       ;; sets the modified flag.
-       (buffer-swap-text slim)
-       (unwind-protect (save-selected-window-excursion (funcall func slim))
-         (buffer-swap-text slim)
-         (kill-buffer slim))))))
+  (let* ((original (current-buffer))
+         (slim (apply #'aoc-slim-buffer original keys)))
+    (unwind-protect
+        (with-temp-buffer
+          ;; NOTE: Use the same major mode as the original buffer, in order to
+          ;; prevent `write-file' -> `set-visited-file-name' -> `set-auto-mode'
+          ;; processing file-local variables (e.g. `aoc-save-slim-p'). The
+          ;; alternative is to use `write-region', however, we couldn't use that
+          ;; for the slim buffer because it doesn't mark it as visiting the
+          ;; file, which is a requirement for any of the file-compilation
+          ;; functionality.
+          (funcall (buffer-local-value 'major-mode original))
+          (let ((temp (current-buffer)))
+            ;; Store a copy in the temp buffer.
+            (with-current-buffer original
+              (save-restriction
+                (widen)
+                (copy-to-buffer temp (point-min) (point-max))))
+            (unwind-protect
+                ;; Write and compile the slim version.
+                (with-current-buffer slim
+                  (write-file (buffer-file-name original))
+                  (funcall func))
+              ;; Restore the original from the copy.
+              (write-file (buffer-file-name original)))))
+      (kill-buffer slim))))
 
 ;;; Load and Compile
 
-(cl-defun aoc-compile-with-slim (func &rest keys &allow-other-keys)
-  (emacs-lisp--before-compile-buffer)
-  (apply #'aoc-call-with-slim
-         (lambda (original)
-           ;; Write out the slim version to disk so that file compilation
-           ;; functions get the real thing.
-           (save-buffer)
-           ;; NOTE: Temporarily swap with the original to avoid the user seeing
-           ;; the temporary slim version as a result of whatever FUNC might
-           ;; decide to do (e.g. `emacs-lisp-native-compile-and-load' displays
-           ;; its compilation buffer which can trigger a redisplay of our
-           ;; buffer). Don't write anything to disk though, and pretend there
-           ;; were no modifications to the buffer (e.g. so we don't get asked to
-           ;; save).
-           (with-silent-modifications
-             (buffer-swap-text original))
-           (unwind-protect (funcall func original)
-             ;; NOTE: Once done, write out the original version to disk and undo
-             ;; the swap for `aoc-call-with-slim'. We set the buffer modified
-             ;; flag in order to force `save-buffer' to save.
-             (with-silent-modifications
-               (set-buffer-modified-p t)
-               (save-buffer)
-               (buffer-swap-text original))))
-         keys))
-
 (defun aoc-load ()
   (interactive)
-  (aoc-call-with-slim (lambda (_) (eval-buffer))
-                      :require nil :input nil :comments nil))
+  (emacs-lisp--before-compile-buffer)
+  (aoc-call-with-slim #'eval-buffer :require nil :input nil :comments nil))
 
 (defun aoc-byte-compile-load ()
   (interactive)
-  (aoc-compile-with-slim (lambda (_) (emacs-lisp-byte-compile-and-load))
-                         :require nil :input nil :comments nil))
+  (emacs-lisp--before-compile-buffer)
+  (aoc-call-with-slim #'emacs-lisp-byte-compile-and-load
+                      :require nil :input nil :comments nil))
 
 (defun aoc-native-compile-load ()
   (interactive)
-  (aoc-compile-with-slim (lambda (_) (emacs-lisp-native-compile-and-load))
-                         :require nil :input nil :comments nil))
+  (emacs-lisp--before-compile-buffer)
+  (aoc-call-with-slim #'emacs-lisp-native-compile-and-load
+                      :require nil :input nil :comments nil))
 
 ;;; Run
 
