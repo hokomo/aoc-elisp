@@ -163,6 +163,17 @@
   (let ((ns (remove nil ns)))
     (and ns (apply #'min ns))))
 
+(gv-define-expander orf
+  (lambda (do place defget)
+    (gv-letplace (getter setter) place
+      (funcall do `(or ,getter ,defget) setter))))
+
+(defmacro incf* (place &optional x)
+  `(cl-incf (orf ,place 0) ,x))
+
+(defmacro decf* (place &optional x)
+  `(cl-decf (orf ,place 0) ,x))
+
 (defun clamp (a b x)
   (min (max a x) b))
 
