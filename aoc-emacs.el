@@ -2,6 +2,7 @@
 
 (require 'aoc-util)
 (require 'cl-lib)
+(require 'dash)
 (require 'f)
 (require 's)
 (require 'transient)
@@ -519,20 +520,101 @@ buffer save when `aoc-mode' is enabled."
 
 ;;; Graphviz
 
-(defun call-with-graphviz (func file)
+(defun graphviz-emit (sexp)
+  "Print to `standard-output' the DOT language description of the
+graph represented by the S-expression SEXP.
+
+The structure is of the form:
+
+- SEXP ::= (digraph [ATTR | NODE | EDGE] ...)
+- ATTR ::= (attr . ATTRS)
+- NODE ::= (node NAME . ATTRS)
+- EDGE ::= (edge SRC DST . ATTRS)
+
+All non-terminals not explicitly specified are printed using
+`princ'. DST can be a list of values. ATTRS is a key-value plist."
+  (cl-labels ((escape (x)
+                (format "\"%s\"" x))
+              (emitp (level x)
+                (prind (make-string (* 2 level) ?\s))
+                (prind x))
+              (emitf (level format &rest args)
+                (prind (make-string (* 2 level) ?\s))
+                (apply #'printf format args))
+              (emit-attrs (attrs)
+                (when attrs
+                  (prind " ["))
+                (cl-loop for (k v . rest) on attrs by #'cddr do
+                  (printf "%s=%s" (unkeywordize k) (escape v))
+                  (when rest
+                    (prind ", ")))
+                (when attrs
+                  (prind "]")))
+              (rec (level sexp)
+                (pcase-exhaustive sexp
+                  (`(digraph . ,elems)
+                   (prind "digraph {\n")
+                   (mapc (-cut rec (1+ level) <>) elems)
+                   (prind "}\n"))
+                  (`(attr . ,attrs)
+                   (cl-loop for (k v . rest) on attrs by #'cddr do
+                     (prind (make-string (* 2 level) ?\s))
+                     (printf "%s=%s;\n" (unkeywordize k) (escape v))))
+                  (`(node ,name . ,attrs)
+                   (emitp level (escape name))
+                   (emit-attrs attrs)
+                   (emitp 0 ";\n"))
+                  (`(edge ,src ,dst . ,attrs)
+                   (emitf level "%s -> %s"
+                          (escape src)
+                          (if (listp dst)
+                              (s-join ", " (mapcar #'escape dst))
+                            (escape dst)))
+                   (emit-attrs attrs)
+                   (emitp 0 ";\n")))))
+    (rec 0 sexp)))
+
+(cl-defmacro with-graphviz (&body body)
+  "Return the result of BODY evaluated within a context where the following
+local macros are present:
+
+- (DIGRAPH &body BODY) -- evaluate BODY and return a `digraph'
+  S-expression containing any accumulated elements
+- (ATTR &rest ARGS) -- add an `attr' to the enclosing `digraph'
+- (NODE &rest ARGS) -- add a `node' to the enclosing `digraph'
+- (EDGE &rest ARGS) -- add an `edge' to the enclosing `digraph'
+
+The macros' arguments follow the S-expressions structure outlined
+in `graphviz-emit'."
+  (mmt-with-gensyms (stack)
+    `(cl-macrolet ((digraph (&body body)
+                     `(let ((,',stack '()))
+                        ,@body
+                        `(digraph ,@,',stack)))
+                   (attr (&rest args &key &allow-other-keys)
+                     `(push (list 'attr ,@args) ,',stack))
+                   (node (&rest args)
+                     `(push (list 'node ,@args) ,',stack))
+                   (edge (&rest args)
+                     `(push (list 'edge ,@args) ,',stack)))
+       ,@body)))
+
+(defun call-with-graphviz-file (func file)
   (require 'graphviz-dot-mode)
   (let ((original (current-buffer))
-        (buffer (find-file-noselect file)))
-    (prog1 buffer
-      (with-buffer buffer
+        (graphviz (find-file-noselect file)))
+    (prog1 graphviz
+      (with-buffer graphviz
         (erase-buffer)
         (funcall func)
         (save-buffer)
         (graphviz-dot-preview)
         (switch-to-buffer original)))))
 
-(defmacro with-graphviz (file &rest body)
+(cl-defmacro with-graphviz-file (file &body body)
   (declare (indent 1))
-  `(call-with-graphviz (lambda () ,@body) ,file))
+  `(call-with-graphviz-file
+    (lambda () (graphviz-emit (with-graphviz ,@body)))
+    ,file))
 
 (provide 'aoc-emacs)

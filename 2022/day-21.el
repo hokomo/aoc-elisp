@@ -75,16 +75,14 @@ hmdt: 32")
 
 (comment
  (defun monkey-show (monkeys)
-   (with-graphviz "day-21.dot"
-     (prind "digraph {\n")
-     (for-do (((name expr) (:ht monkeys))
-              (:let ((neighbors (and (not (integerp expr)) expr)))))
-       (if (not neighbors)
-           (printf "  %s [label=\"%s (%s)\"];\n" name name (h. monkeys name))
-         (pcase-let ((`(,op ,arg1 ,arg2) neighbors))
-           (printf "  %s [label=\"%s (%s)\"];\n" name name op)
-           (printf "  %s -> %s [label=left];\n" name arg1)
-           (printf "  %s -> %s [label=right];\n" name arg2))))
-     (prind "}\n")))
+   (with-graphviz-file "day-21.dot"
+     (digraph
+      (for-do (((name expr) (:ht monkeys)))
+        (pcase-exhaustive expr
+          ((or `(,op ,arg1 ,arg2) lit)
+           (node name :label (format "%s (%s)" name (or lit op)))
+           (when op
+             (edge name arg1 :label 'left)
+             (edge name arg2 :label 'right))))))))
 
  (monkey-show *test-21*))

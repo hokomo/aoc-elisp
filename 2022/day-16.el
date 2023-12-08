@@ -108,14 +108,13 @@ Valve JJ has flow rate=21; tunnel leads to valve II")
 
 (comment
  (defun valves-show (valves)
-   (with-graphviz "day-16.dot"
-     (princ "digraph {\n")
-     (princ "  AA [style=filled, color=red];\n")
-     (for-do (((k v) (:ht valves)))
-       (printf "  %s -> %s;\n" k (s-join ", " (cl-second v)))
-       (when (non-zero-p (car v))
-         (printf "  %s [style=filled, color=yellow];\n" k)))
-     (princ "}\n")))
+   (with-graphviz-file "day-16.dot"
+     (digraph
+      (node "AA" :style 'filled :color 'red)
+      (for-do (((k v) (:ht valves)))
+        (edge k (cl-second v))
+        (when (non-zero-p (car v))
+          (node k :style 'filled :color 'yellow))))))
 
  (valves-show *test-16*)
  (valves-show *input-16*))
