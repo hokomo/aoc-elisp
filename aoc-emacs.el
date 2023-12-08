@@ -157,8 +157,7 @@ file. Can be a path relative to `aoc-root'."
 
 ;;; Slim
 
-(cl-defun aoc-slim-buffer (buffer &key (require t) (input t) (output t)
-                                    (dev t) (comments t))
+(cl-defun aoc-slim-buffer (buffer &key require input output dev comments)
   ;; Don't prefix the buffer name with a space, because such buffers
   ;; ("uninteresting buffers") are not fontified by font-lock. See
   ;; https://stackoverflow.com/q/18418079.
@@ -169,7 +168,7 @@ file. Can be a path relative to `aoc-root'."
           (insert-buffer buffer)
           (goto-char (point-min))
           ;; Remove everything before and including any `require's.
-          (when require
+          (unless require
             (save-excursion
               (goto-char (point-max))
               (when (re-search-backward (rx bol "(require") nil t)
@@ -177,21 +176,21 @@ file. Can be a path relative to `aoc-root'."
                 (beginning-of-line)
                 (delete-region (point-min) (point)))))
           ;; Remove input forms (`definput').
-          (when input
+          (unless input
             (save-excursion (delete-sexps (rx bol "(definput"))))
           ;; Remove output forms (`expect', `display', `with-profiling' and
           ;; `with-sprofiling').
-          (when output
+          (unless output
             (save-excursion
               (delete-sexps
                (rx bol "(" (or "expect" "display"
                                (seq "with-" (? "s") "profiling"))))))
           ;; Remove "dev" forms useful during development (`comment').
-          (when dev
+          (unless dev
             (save-excursion
               (save-excursion (delete-sexps (rx bol "(comment")))))
           ;; Remove comments.
-          (when comments
+          (unless comments
             (save-excursion
               (goto-char (point-min))
               (while (re-search-forward (rx bol (* blank) ";;") nil t)
@@ -247,19 +246,19 @@ file. Can be a path relative to `aoc-root'."
 (defun aoc-load ()
   (interactive)
   (emacs-lisp--before-compile-buffer)
-  (aoc-call-with-slim #'eval-buffer :require nil :input nil :comments nil))
+  (aoc-call-with-slim #'eval-buffer :require t :input t :comments t))
 
 (defun aoc-byte-compile-load ()
   (interactive)
   (emacs-lisp--before-compile-buffer)
   (aoc-call-with-slim #'emacs-lisp-byte-compile-and-load
-                      :require nil :input nil :comments nil))
+                      :require t :input t :comments t))
 
 (defun aoc-native-compile-load ()
   (interactive)
   (emacs-lisp--before-compile-buffer)
   (aoc-call-with-slim #'emacs-lisp-native-compile-and-load
-                      :require nil :input nil :comments nil))
+                      :require t :input t :comments t))
 
 ;;; Run
 
@@ -307,7 +306,7 @@ of the prefix argument is negative."
 
 (cl-defun aoc-copy (buffer &optional (comments t))
   (interactive (list (current-buffer) (not current-prefix-arg)))
-  (with-current-buffer (aoc-slim-buffer buffer :comments (not comments))
+  (with-current-buffer (aoc-slim-buffer buffer :comments comments)
     (let* ((name (symbol-name major-mode))
            (lang (and (string-match (rx (*? nonl) (group (+ (not "-"))) "-mode")
                                     name)
