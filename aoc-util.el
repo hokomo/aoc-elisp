@@ -167,9 +167,22 @@
     (and ns (apply #'min ns))))
 
 (gv-define-expander orf
-  (lambda (do place defget)
+  (lambda (do place value)
     (gv-letplace (getter setter) place
-      (funcall do `(or ,getter ,defget) setter))))
+      (funcall do `(or ,getter ,value) setter))))
+
+(gv-define-expander nilf
+  (cl-labels ((expander (do place &optional (init nil initp))
+                (gv-letplace (getter setter) place
+                  (funcall do getter
+                           (lambda (v)
+                             (if (not initp)
+                                 `(when (not ,getter)
+                                    ,(funcall setter v))
+                               `(if (not ,getter)
+                                    ,(funcall setter init)
+                                  ,(funcall setter v))))))))
+    #'expander))
 
 (defmacro incf* (place &optional x)
   `(cl-incf (orf ,place 0) ,x))
