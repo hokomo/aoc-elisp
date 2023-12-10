@@ -1,0 +1,71 @@
+(defun read-10 (string)
+  (vecify (s-split "\n" string t)))
+
+(defun pipes-start (pipes)
+  (with-tensor (i j) pipes
+    (when (= (v. pipes i j) ?S)
+      (cl-return `[,i ,j]))))
+
+(defvar *pipes*
+  (ht (?| '([-1 0] [1 0]))
+      (?- '([0 -1] [0 1]))
+      (?L '([-1 0] [0 1]))
+      (?J '([-1 0] [0 -1]))
+      (?7 '([1 0] [0 -1]))
+      (?F '([1 0] [0 1]))))
+
+(defun pipe-follow (pipe idir)
+  (let* ((dirs (h. *pipes* pipe))
+         (dirs (cl-remove (v2- idir) dirs :test #'equal)))
+    (and (= (length dirs) 1) (cl-first dirs))))
+
+(defun pipes-walk (pipes pos idir)
+  (let ((dims (vdims pipes))
+        (path '()))
+    (pfor-do ((cur (:step pos ncur))
+              (:let ((pipe (v2.. pipes cur))))
+              (dir (:step idir ndir))
+              (:do (push cur path))
+              (:return (= pipe ?S) (list (nreverse path) dir))
+              (:let ((ndir (pipe-follow pipe dir))))
+              (:while ndir)
+              (:let ((ncur (v2+ cur ndir))))
+              (:while (v2< [-1 -1] ncur dims))))))
+
+(defun pipe-identify (&rest odirs)
+  (for-do (((pipe dirs) (:ht *pipes*))
+           (:return (= (length (cl-union odirs dirs :test #'equal))
+                       (length odirs))
+                    pipe))))
+
+(defun pipes-loop (pipes)
+  (let ((start (pipes-start pipes)))
+    (pfor-do ((dir1 (h. *neighbors-2* 4))
+              (:let (((path dir2) (pipes-walk pipes (v2+ start dir1) dir1))))
+              (:return path (list path (pipe-identify dir1 (v2- dir2))))))))
+
+(defun solve-10-1 (pipes)
+  (/ (length (cl-first (pipes-loop pipes))) 2))
+
+(defun pipes-inside-loop (pipes loop initial)
+  (pcase-let* ((`[,h ,w] (vdims pipes))
+               (inside (st)))
+    (prog1 inside
+      (for-do ((r (:range 0 (1- h)))
+               (:let ((insidep nil)
+                      (opening nil)))
+               (c (:range 0 (1- w)))
+               (:let* ((pos `[,r ,c])
+                       (tile (v2.. pipes pos))
+                       (tile (if (= tile ?S) initial tile)))))
+        (if (s. loop pos)
+            (cl-case tile
+              (?| (setf insidep (not insidep)))
+              ((?F ?L) (setf opening tile))
+              (?7 (setf insidep (if (= opening ?F) insidep (not insidep))))
+              (?J (setf insidep (if (= opening ?L) insidep (not insidep)))))
+          (setf (s. inside pos) insidep))))))
+
+(defun solve-10-2 (pipes)
+  (seq-let [loop initial] (pipes-loop pipes)
+    (set-size (pipes-inside-loop pipes (setify loop) initial))))
