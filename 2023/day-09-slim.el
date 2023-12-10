@@ -8,11 +8,10 @@
   (--map (apply (-flip #'-) it) (-partition-in-steps 2 1 nums)))
 
 (defun extrapolate-value (op history)
-  (cl-labels ((rec (history)
-                (if (-all-p #'zerop history)
-                    0
-                  (funcall op history (rec (adjacent-difference history))))))
-    (rec history)))
+  (named-let rec ((history history))
+    (if (-all-p #'zerop history)
+        0
+      (funcall op history (rec (adjacent-difference history))))))
 
 (defun extrapolate-last (history)
   (extrapolate-value (lambda (history diff) (+ (-last-item history) diff))
