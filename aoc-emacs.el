@@ -115,17 +115,18 @@ relative to `aoc-root', if it exists."
   (if buffer-file-name
       (let* ((name (file-name-nondirectory buffer-file-name))
              (day (or (-some->> name (s-match (rx bos "day-" (group (+ digit))))
-                                cl-second string-to-number)
+                                     cl-second string-to-number)
                       (user-error "Weird filename; cannot auto-detect day")))
-             (file (aoc-file (format "day-%02d-input.txt" day))))
+             (file (aoc-file (format "day-%02d-input.txt" day)))
+             (openp (get-file-buffer file)))
         (when (or (file-exists-p file)
                   (and (y-or-n-p "Input file doesn't exist; fetch?")
                        (aoc-fetch-input (aoc-read-year) day)))
-          (aoc-display-buffer (or (get-file-buffer file)
-                                  (with-current-buffer (find-file-noselect file)
-                                    (visual-line-mode -1)
-                                    (toggle-truncate-lines 1)
-                                    (current-buffer))))))
+          (aoc-display-buffer (with-current-buffer (find-file-noselect file)
+                                (unless openp
+                                  (visual-line-mode -1)
+                                  (toggle-truncate-lines 1))
+                                (current-buffer)))))
     (user-error "Buffer not visiting a file")))
 
 ;;; New
