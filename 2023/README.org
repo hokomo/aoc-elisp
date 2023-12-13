@@ -6,6 +6,7 @@
 
 * Contents
 
+- [[./day-13.el][Day 13]] ([[./day-13-slim.el][slim]], [[./day-13-input.txt][input]])
 - [[./day-11.el][Day 11]] ([[./day-11-slim.el][slim]], [[./day-11-input.txt][input]])
 - [[./day-10.el][Day 10]] ([[./day-10-slim.el][slim]], [[./day-10-input.txt][input]])
 - [[./day-09.el][Day 09]] ([[./day-09-slim.el][slim]], [[./day-09-input.txt][input]])
