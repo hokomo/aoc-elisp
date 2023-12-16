@@ -8,7 +8,7 @@
 (require 's)
 
 (defun read-03 (string)
-  (cl-coerce (s-split "\n" string t) 'vector))
+  (vecify (s-split "\n" string t)))
 
 (definput *test-03* #'read-03
   "467..114..

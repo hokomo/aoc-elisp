@@ -1,5 +1,5 @@
 (defun read-03 (string)
-  (cl-coerce (s-split "\n" string t) 'vector))
+  (vecify (s-split "\n" string t)))
 
 (defun v2overlap-p (u1 u2 v1 v2)
   (with-vref
