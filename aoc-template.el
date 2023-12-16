@@ -3,7 +3,6 @@
 (require 'aoc-util)
 (require 'cl-lib)
 (require 'dash)
-(require 'heap)
 (require 'ht)
 (require 'queue)
 (require 's)
