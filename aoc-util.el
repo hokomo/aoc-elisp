@@ -48,17 +48,17 @@
 
 ;;; Input
 
-(defun read-puzzle (f test)
-  (funcall f (if (file-exists-p (expand-file-name test))
-                 (with-temp-buffer
-                   (insert-file-contents test)
-                   (buffer-string))
-               test)))
+(defun read-puzzle (readfn input)
+  (funcall readfn (if (file-exists-p (expand-file-name input))
+                      (with-temp-buffer
+                        (insert-file-contents input)
+                        (buffer-string))
+                    input)))
 
-(defmacro definput (var f test)
+(defmacro definput (var readfn input)
   (declare (indent 2))
   `(progn
-     (defvar ,var (read-puzzle ,f ,test))
+     (defvar ,var (read-puzzle ,readfn ,input))
      ,var))
 
 ;;; Output
@@ -523,6 +523,8 @@
       (`(,k (:st ,st))
        (make-loop form `(cl-loop for ,k being the hash-key in ,st)))
       (`(,s ,(or `(:seq ,seq) seq))
+       (when (keywordp s)
+         (error "Unrecognized clause %S" s))
        (make-loop form `(cl-loop for ,s being the elements of ,seq))))))
 
 (defun for--expand (clauses form)
