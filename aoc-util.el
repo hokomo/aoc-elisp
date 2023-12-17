@@ -631,6 +631,9 @@
   (define-v-bool-macro 3 v3= =)
   (define-v-bool-macro 3 v3/= /= :reduce or))
 
+(defun vsum (v)
+  (cl-loop for i from 0 below (length v) sum (aref v i)))
+
 (defun vrev (v)
   (let ((len (length v))
         (rev (copy-sequence v)))
